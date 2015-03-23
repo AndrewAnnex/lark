@@ -1,0 +1,26 @@
+{
+    "images":["/pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i008xxrdr/I00818003RDR.QUB",
+                "/pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i008xxrdr/ISHOULDFAIL.QUB"],
+    "latlon":[],
+    "uddw": false,
+    "tesatm":false,
+    "rtilt":true,
+    "force":true,
+    "name":"THEMIS",
+    "projection":{
+        "name": "None",
+        "kerneluri": "/usgs/shareall/rfergason/margaritifer_sinus_nightir_ck.bc"  
+        },
+    "resolution":[],
+    "outputformat":["GTiff"],
+    "bands":[9,10],
+    "processing_pipeline":"themis_davinci",
+    "ancillarydata":{
+    	"elevation":"/home/jlaura/Mars_MGS_MOLA_DEM_mosaic_global_463m.cub",
+    	"slope":"/home/jlaura/Mars_MGS_MOLA_SLOPE_mosaic_global_463m.cub",
+    	"slopeazimuth":"/home/jlaura/Mars_MGS_MOLA_ASPECT_mosaic_global_463m.cub",
+    	"albedo":"/home/jlaura/TES_global_Albedo_Christensen_2001.tif",
+    	"dustopacity":"/home/jlaura/TES_global_Dust_Bandfield_2002.tif",
+    	"emissivity":1
+    }
+}
