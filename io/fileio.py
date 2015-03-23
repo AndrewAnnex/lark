@@ -18,7 +18,7 @@ def readinputfile(inputfile):
     >>> k = inputs.keys()
     >>> k.sort()
     >>> print k
-    [u'bands', u'images', u'latlon', u'outputformat', u'projection', u'rtilt', u'tesatm', u'uddw']
+    [u'ancillarydata', u'bands', u'force', u'images', u'latlon', u'name', u'outputformat', u'processing_pipeline', u'projection', u'resolution', u'rtilt', u'tesatm', u'uddw']
 
     """
     with open(inputfile, 'r') as f:
