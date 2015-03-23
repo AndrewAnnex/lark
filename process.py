@@ -7,6 +7,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 
 import numpy as np
@@ -315,8 +316,6 @@ def processimages(jobs):
         #os.removedirs(workingpath)
 
 if __name__ == "__main__":
-    import sys
-    import fileio
     logger = createlogger()
     jobs = fileio.readinputfile(sys.argv[1])
     processimages(jobs)
