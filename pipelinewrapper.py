@@ -1,5 +1,8 @@
 import subprocess
 import os
+import logging
+
+logger = logging.getLogger('ThemisTi')
 
 def themis_davinci(imagepath, uddw, tesatm, deplaid, rtilt, force, workingpath):
     """
@@ -22,10 +25,9 @@ def themis_davinci(imagepath, uddw, tesatm, deplaid, rtilt, force, workingpath):
     basepath, fname = os.path.split(imagepath)
     outname, ext = os.path.splitext(fname)
     outpath = os.path.join(workingpath, outname) + '_dvprocessed.cub'
-    print imagepath
-    print outpath
-    cmd = r'./ti_pipeline.dv {} {} {} {} {} {} {}'.format(uddw, tesatm, deplaid, rtilt, force, imagepath, outpath)
+    cmd = r'davinci/ti_pipeline.dv {} {} {} {} {} {} {}'.format(uddw, tesatm, deplaid, rtilt, force, imagepath, outpath)
+    logger.debug(cmd)
     cmd = cmd.split()
     response = subprocess.check_output(cmd)
-    print response
+    logger.debug(response)
     return outpath

@@ -1,5 +1,5 @@
 #!/usgs/apps/davinci/current/bin/davinci -f
-debug=1
+#debug=1
 insmod("isis34")
 
 f_uddw = atoi($1)
