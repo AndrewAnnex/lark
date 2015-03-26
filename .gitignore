@@ -1,6 +1,12 @@
 #OS X Stuff
 .DS_Store
 
+
 *.h5
 *.ipynb_checkpoints
 *.pyc
+
+#Geospatial
+*.cub
+*.vrt
+*.cub.*
