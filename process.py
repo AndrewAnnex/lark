@@ -209,8 +209,10 @@ def processimages(jobs):
             logger.error("Image {} contains bands {}.  Band(s) {} must be present.\n".format(i, bands, jobs['bands']))
             continue
 
-        kernel = jobs['projection']['kerneluri']
-
+	if 'kerneluri' in jobs['projection'].keys():
+            kernel = jobs['projection']['kerneluri']
+	else:
+	    kernel = None
         #Checks passed, create a temporary working directory
         workingpath = createworkingdir()
 
@@ -234,8 +236,6 @@ def processimages(jobs):
         #Process temperature data using some pipeline
         #TODO Fix davinci to processing works - errors on that side
         isiscube = radiance_to_temperature(i, jobs, workingpath)
-        print workingpath
-        exit()
 
         #Processing the temperature to a level2 image
         isiswrappers.spiceinit(isiscube, kernel)

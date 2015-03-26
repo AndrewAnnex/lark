@@ -22,8 +22,10 @@ def readinputfile(inputfile):
 
     """
     with open(inputfile, 'r') as f:
-        jobjson = json.load(f)
-
+	try:
+            jobjson = json.load(f)
+	except:
+	    raise IOError
     return jobjson
 
 if __name__ == "__main__":

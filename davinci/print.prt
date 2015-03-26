@@ -1,0 +1,46 @@
+Object = thm2isis
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-05-16
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:27:39
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Import a Themis IR/VIS RDR or EDR"
+
+  Group = UserParameters
+    FROM       = /pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i0-
+                 08xxrdr/I00818003RDR.QUB
+    TO         = /tmp/dv_24223/I00818003RDR.I3.cub
+    TIMEOFFSET = 0.0
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:01.0
+    CpuTime     = 00:00:00.4
+  End_Group
+End_Object
+
+
+Object = thm2isis
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-05-16
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:39:44
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Import a Themis IR/VIS RDR or EDR"
+
+  Group = UserParameters
+    FROM       = /pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i0-
+                 08xxrdr/I00818003RDR.QUB
+    TO         = /tmp/dv_24422/I00818003RDR.I3.cub
+    TIMEOFFSET = 0.0
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:00.0
+    CpuTime     = 00:00:00.3
+  End_Group
+End_Object
+
+

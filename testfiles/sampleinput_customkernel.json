@@ -8,7 +8,8 @@
     "force":true,
     "name":"THEMIS",
     "projection":{
-        "name": "None"
+        "name": "None",
+        "kerneluri": "/usgs/shareall/rfergason/margaritifer_sinus_nightir_ck.bc"  
         },
     "resolution":[],
     "outputformat":["GTiff"],

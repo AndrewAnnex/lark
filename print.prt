@@ -1,0 +1,2136 @@
+Object = thm2isis
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-05-16
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T12:42:30
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Import a Themis IR/VIS RDR or EDR"
+
+  Group = UserParameters
+    FROM       = /pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i0-
+                 08xxrdr/I00818003RDR.QUB
+    TO         = /scratch/jlaura/tmpFe_cKI/I00818003RDR
+    TIMEOFFSET = 0.0
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:01.0
+    CpuTime     = 00:00:00.5
+  End_Group
+End_Object
+
+
+Object = spiceinit
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-04-27
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T12:42:31
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Update SPICE data (kernels, pointing, and position) for
+                       a camera cube"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmpFe_cKI/I00818003RDR.cub
+    WEB          = false
+    ATTACH       = TRUE
+    CKSMITHED    = FALSE
+    CKRECON      = TRUE
+    CKPREDICTED  = FALSE
+    CKNADIR      = FALSE
+    SPKSMITHED   = FALSE
+    SPKRECON     = TRUE
+    SPKPREDICTED = FALSE
+    CK           = /usgs/shareall/rfergason/margaritifer_sinus_nightir_ck.bc
+    SHAPE        = SYSTEM
+    STARTPAD     = 0.0
+    ENDPAD       = 0.0
+    URL          = http://services.isis.astrogeology.usgs.gov/cgi-bin/spicein-
+                   it.cgi
+    PORT         = 80
+  End_Group
+
+  Group = Kernels
+    NaifFrameCode             = -53031
+    LeapSecond                = $base/kernels/lsk/naif0011.tls
+    TargetAttitudeShape       = $base/kernels/pck/pck00009.tpc
+    TargetPosition            = $base/kernels/spk/de405.bsp
+    InstrumentPointing        = (/usgs/shareall/rfergason/margaritifer_sinus_-
+                                 nightir_ck.bc, $odyssey/kernels/fk/m01_v29.tf)
+    Instrument                = Null
+    SpacecraftClock           = $odyssey/kernels/sclk/ORB1_SCLKSCET.00210.tsc
+    InstrumentPosition        = $odyssey/kernels/spk/m01_map1_v2.bsp
+    InstrumentAddendum        = $odyssey/kernels/iak/themisAddendum003.ti
+    ShapeModel                = $base/dems/molaMarsPlanetaryRadius0005.cub
+    InstrumentPositionQuality = Reconstructed
+    InstrumentPointingQuality = Unknown
+    CameraVersion             = 2
+    Error                     = "Spice file does not exist
+                                 [/usgs/shareall/rfergason/margaritifer_sinus_-
+                                 nightir_ck.bc]"
+  End_Group
+
+  Group = Error
+    Program = spiceinit
+    Code    = 1
+    Message = "Unable to initialize camera model"
+    File    = spiceinit.cpp
+    Line    = 240
+  End_Group
+End_Object
+
+
+Object = thm2isis
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-05-16
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T12:51:48
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Import a Themis IR/VIS RDR or EDR"
+
+  Group = UserParameters
+    FROM       = /pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i0-
+                 08xxrdr/I00818003RDR.QUB
+    TO         = /scratch/jlaura/tmpjMyp2X/I00818003RDR
+    TIMEOFFSET = 0.0
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:01.0
+    CpuTime     = 00:00:00.4
+  End_Group
+End_Object
+
+
+Object = spiceinit
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-04-27
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T12:51:49
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Update SPICE data (kernels, pointing, and position) for
+                       a camera cube"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmpjMyp2X/I00818003RDR.cub
+    WEB          = false
+    ATTACH       = TRUE
+    CKSMITHED    = FALSE
+    CKRECON      = TRUE
+    CKPREDICTED  = FALSE
+    CKNADIR      = FALSE
+    SPKSMITHED   = FALSE
+    SPKRECON     = TRUE
+    SPKPREDICTED = FALSE
+    SHAPE        = SYSTEM
+    STARTPAD     = 0.0
+    ENDPAD       = 0.0
+    URL          = http://services.isis.astrogeology.usgs.gov/cgi-bin/spicein-
+                   it.cgi
+    PORT         = 80
+  End_Group
+
+  Group = Kernels
+    NaifFrameCode             = -53031
+    LeapSecond                = $base/kernels/lsk/naif0011.tls
+    TargetAttitudeShape       = $base/kernels/pck/pck00009.tpc
+    TargetPosition            = $base/kernels/spk/de405.bsp
+    InstrumentPointing        = ($odyssey/kernels/ck/m01_sc_map1_v2.bc,
+                                 $odyssey/kernels/fk/m01_v29.tf)
+    Instrument                = Null
+    SpacecraftClock           = $odyssey/kernels/sclk/ORB1_SCLKSCET.00210.tsc
+    InstrumentPosition        = $odyssey/kernels/spk/m01_map1_v2.bsp
+    InstrumentAddendum        = $odyssey/kernels/iak/themisAddendum003.ti
+    ShapeModel                = $base/dems/molaMarsPlanetaryRadius0005.cub
+    InstrumentPositionQuality = Reconstructed
+    InstrumentPointingQuality = Reconstructed
+    CameraVersion             = 2
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:01.0
+    CpuTime     = 00:00:00.6
+  End_Group
+End_Object
+
+
+Object = campt
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2013-02-25
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T12:51:50
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Computes geometric and photometric information at a
+                       given pixel location"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmpjMyp2X/I00818003RDR.cub
+    TO           = /scratch/jlaura/tmpjMyp2X/I00818003RDR_campt.pvl
+    FORMAT       = PVL
+    APPEND       = TRUE
+    TYPE         = IMAGE
+    ALLOWOUTSIDE = true
+  End_Group
+
+  Group = GroundPoint
+    Filename                   = /scratch/jlaura/tmpjMyp2X/I00818003RDR.cub
+    Sample                     = 160.0
+    Line                       = 3592.0
+    PixelValue                 = 2.9941204e-05
+    RightAscension             = 283.32666507065
+    Declination                = -31.622150131396
+    PlanetocentricLatitude     = 1.0248466252642
+    PlanetographicLatitude     = 1.0370158526088
+    PositiveEast360Longitude   = 359.88872681758
+    PositiveEast180Longitude   = -0.11127318241811
+    PositiveWest360Longitude   = 0.11127318241813
+    PositiveWest180Longitude   = 0.11127318241813
+    BodyFixedCoordinate        = (3393.8854737097, -6.5912169347033,
+                                  60.712842280426) <km>
+    LocalRadius                = 3394434.8722602 <meters>
+    SampleResolution           = 99.949512657054 <meters/pixel>
+    LineResolution             = 99.949512657054 <meters/pixel>
+
+    # Spacecraft Information
+    SpacecraftPosition         = (3801.5136632073, -7.4582575663582,
+                                  58.227021519281) <km>
+    SpacecraftAzimuth          = 278.12758368073
+    SlantDistance              = 407.63669110786 <km>
+    TargetCenterDistance       = 3801.9668782345 <km>
+    SubSpacecraftLatitude      = 0.87751764351502
+    SubSpacecraftLongitude     = 359.88759053086
+    SpacecraftAltitude         = 407.59017123958 <km>
+    OffNadirAngle              = 1.2269532845761
+    SubSpacecraftGroundAzimuth = 180.44183832306
+
+    # Sun Information
+    SunPosition                = (-150502526.56695, 155968057.68585,
+                                  -47649619.637854) <km>
+    SubSolarAzimuth            = 200.05937144229
+    SolarDistance              = 1.4834447008573 <AU>
+    SubSolarLatitude           = -12.398947274583
+    SubSolarLongitude          = 133.9783075778
+    SubSolarGroundAzimuth      = 106.10383229745
+
+    # Illumination and Other
+    Phase                      = 132.71638808591
+    Incidence                  = 133.10157206769
+    Emission                   = 1.374286646902
+    NorthAzimuth               = 97.694219514847
+
+    # Time
+    EphemerisTime              = 67428694.869346 <seconds>
+    UTC                        = 2002-02-19T22:10:30.6841257
+    LocalSolarTime             = 3.0606946159854 <hour>
+    SolarLongitude             = 329.70573073485
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:00.0
+    CpuTime     = 00:00:00.0
+  End_Group
+End_Object
+
+
+Object = thm2isis
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-05-16
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T12:58:07
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Import a Themis IR/VIS RDR or EDR"
+
+  Group = UserParameters
+    FROM       = /pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i0-
+                 08xxrdr/I00818003RDR.QUB
+    TO         = /scratch/jlaura/tmpYioWKW/I00818003RDR
+    TIMEOFFSET = 0.0
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:01.0
+    CpuTime     = 00:00:00.4
+  End_Group
+End_Object
+
+
+Object = spiceinit
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-04-27
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T12:58:08
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Update SPICE data (kernels, pointing, and position) for
+                       a camera cube"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmpYioWKW/I00818003RDR.cub
+    WEB          = false
+    ATTACH       = TRUE
+    CKSMITHED    = FALSE
+    CKRECON      = TRUE
+    CKPREDICTED  = FALSE
+    CKNADIR      = FALSE
+    SPKSMITHED   = FALSE
+    SPKRECON     = TRUE
+    SPKPREDICTED = FALSE
+    SHAPE        = SYSTEM
+    STARTPAD     = 0.0
+    ENDPAD       = 0.0
+    URL          = http://services.isis.astrogeology.usgs.gov/cgi-bin/spicein-
+                   it.cgi
+    PORT         = 80
+  End_Group
+
+  Group = Kernels
+    NaifFrameCode             = -53031
+    LeapSecond                = $base/kernels/lsk/naif0011.tls
+    TargetAttitudeShape       = $base/kernels/pck/pck00009.tpc
+    TargetPosition            = $base/kernels/spk/de405.bsp
+    InstrumentPointing        = ($odyssey/kernels/ck/m01_sc_map1_v2.bc,
+                                 $odyssey/kernels/fk/m01_v29.tf)
+    Instrument                = Null
+    SpacecraftClock           = $odyssey/kernels/sclk/ORB1_SCLKSCET.00210.tsc
+    InstrumentPosition        = $odyssey/kernels/spk/m01_map1_v2.bsp
+    InstrumentAddendum        = $odyssey/kernels/iak/themisAddendum003.ti
+    ShapeModel                = $base/dems/molaMarsPlanetaryRadius0005.cub
+    InstrumentPositionQuality = Reconstructed
+    InstrumentPointingQuality = Reconstructed
+    CameraVersion             = 2
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:01.0
+    CpuTime     = 00:00:00.6
+  End_Group
+End_Object
+
+
+Object = campt
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2013-02-25
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T12:58:09
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Computes geometric and photometric information at a
+                       given pixel location"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmpYioWKW/I00818003RDR.cub
+    TO           = /scratch/jlaura/tmpYioWKW/I00818003RDR_campt.pvl
+    FORMAT       = PVL
+    APPEND       = TRUE
+    TYPE         = IMAGE
+    ALLOWOUTSIDE = true
+  End_Group
+
+  Group = GroundPoint
+    Filename                   = /scratch/jlaura/tmpYioWKW/I00818003RDR.cub
+    Sample                     = 160.0
+    Line                       = 3592.0
+    PixelValue                 = 2.9941204e-05
+    RightAscension             = 283.32666507065
+    Declination                = -31.622150131396
+    PlanetocentricLatitude     = 1.0248466252642
+    PlanetographicLatitude     = 1.0370158526088
+    PositiveEast360Longitude   = 359.88872681758
+    PositiveEast180Longitude   = -0.11127318241811
+    PositiveWest360Longitude   = 0.11127318241813
+    PositiveWest180Longitude   = 0.11127318241813
+    BodyFixedCoordinate        = (3393.8854737097, -6.5912169347033,
+                                  60.712842280426) <km>
+    LocalRadius                = 3394434.8722602 <meters>
+    SampleResolution           = 99.949512657054 <meters/pixel>
+    LineResolution             = 99.949512657054 <meters/pixel>
+
+    # Spacecraft Information
+    SpacecraftPosition         = (3801.5136632073, -7.4582575663582,
+                                  58.227021519281) <km>
+    SpacecraftAzimuth          = 278.12758368073
+    SlantDistance              = 407.63669110786 <km>
+    TargetCenterDistance       = 3801.9668782345 <km>
+    SubSpacecraftLatitude      = 0.87751764351502
+    SubSpacecraftLongitude     = 359.88759053086
+    SpacecraftAltitude         = 407.59017123958 <km>
+    OffNadirAngle              = 1.2269532845761
+    SubSpacecraftGroundAzimuth = 180.44183832306
+
+    # Sun Information
+    SunPosition                = (-150502526.56695, 155968057.68585,
+                                  -47649619.637854) <km>
+    SubSolarAzimuth            = 200.05937144229
+    SolarDistance              = 1.4834447008573 <AU>
+    SubSolarLatitude           = -12.398947274583
+    SubSolarLongitude          = 133.9783075778
+    SubSolarGroundAzimuth      = 106.10383229745
+
+    # Illumination and Other
+    Phase                      = 132.71638808591
+    Incidence                  = 133.10157206769
+    Emission                   = 1.374286646902
+    NorthAzimuth               = 97.694219514847
+
+    # Time
+    EphemerisTime              = 67428694.869346 <seconds>
+    UTC                        = 2002-02-19T22:10:30.6841257
+    LocalSolarTime             = 3.0606946159854 <hour>
+    SolarLongitude             = 329.70573073485
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:00.0
+    CpuTime     = 00:00:00.1
+  End_Group
+End_Object
+
+
+Object = thm2isis
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-05-16
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T12:59:36
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Import a Themis IR/VIS RDR or EDR"
+
+  Group = UserParameters
+    FROM       = /pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i0-
+                 08xxrdr/I00818003RDR.QUB
+    TO         = /scratch/jlaura/tmpL1Fw3s/I00818003RDR
+    TIMEOFFSET = 0.0
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:01.0
+    CpuTime     = 00:00:00.4
+  End_Group
+End_Object
+
+
+Object = spiceinit
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-04-27
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T12:59:37
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Update SPICE data (kernels, pointing, and position) for
+                       a camera cube"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmpL1Fw3s/I00818003RDR.cub
+    WEB          = false
+    ATTACH       = TRUE
+    CKSMITHED    = FALSE
+    CKRECON      = TRUE
+    CKPREDICTED  = FALSE
+    CKNADIR      = FALSE
+    SPKSMITHED   = FALSE
+    SPKRECON     = TRUE
+    SPKPREDICTED = FALSE
+    SHAPE        = SYSTEM
+    STARTPAD     = 0.0
+    ENDPAD       = 0.0
+    URL          = http://services.isis.astrogeology.usgs.gov/cgi-bin/spicein-
+                   it.cgi
+    PORT         = 80
+  End_Group
+
+  Group = Kernels
+    NaifFrameCode             = -53031
+    LeapSecond                = $base/kernels/lsk/naif0011.tls
+    TargetAttitudeShape       = $base/kernels/pck/pck00009.tpc
+    TargetPosition            = $base/kernels/spk/de405.bsp
+    InstrumentPointing        = ($odyssey/kernels/ck/m01_sc_map1_v2.bc,
+                                 $odyssey/kernels/fk/m01_v29.tf)
+    Instrument                = Null
+    SpacecraftClock           = $odyssey/kernels/sclk/ORB1_SCLKSCET.00210.tsc
+    InstrumentPosition        = $odyssey/kernels/spk/m01_map1_v2.bsp
+    InstrumentAddendum        = $odyssey/kernels/iak/themisAddendum003.ti
+    ShapeModel                = $base/dems/molaMarsPlanetaryRadius0005.cub
+    InstrumentPositionQuality = Reconstructed
+    InstrumentPointingQuality = Reconstructed
+    CameraVersion             = 2
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:01.0
+    CpuTime     = 00:00:00.6
+  End_Group
+End_Object
+
+
+Object = campt
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2013-02-25
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T12:59:38
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Computes geometric and photometric information at a
+                       given pixel location"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmpL1Fw3s/I00818003RDR.cub
+    TO           = /scratch/jlaura/tmpL1Fw3s/I00818003RDR_campt.pvl
+    FORMAT       = PVL
+    APPEND       = TRUE
+    TYPE         = IMAGE
+    ALLOWOUTSIDE = true
+  End_Group
+
+  Group = GroundPoint
+    Filename                   = /scratch/jlaura/tmpL1Fw3s/I00818003RDR.cub
+    Sample                     = 160.0
+    Line                       = 3592.0
+    PixelValue                 = 2.9941204e-05
+    RightAscension             = 283.32666507065
+    Declination                = -31.622150131396
+    PlanetocentricLatitude     = 1.0248466252642
+    PlanetographicLatitude     = 1.0370158526088
+    PositiveEast360Longitude   = 359.88872681758
+    PositiveEast180Longitude   = -0.11127318241811
+    PositiveWest360Longitude   = 0.11127318241813
+    PositiveWest180Longitude   = 0.11127318241813
+    BodyFixedCoordinate        = (3393.8854737097, -6.5912169347033,
+                                  60.712842280426) <km>
+    LocalRadius                = 3394434.8722602 <meters>
+    SampleResolution           = 99.949512657054 <meters/pixel>
+    LineResolution             = 99.949512657054 <meters/pixel>
+
+    # Spacecraft Information
+    SpacecraftPosition         = (3801.5136632073, -7.4582575663582,
+                                  58.227021519281) <km>
+    SpacecraftAzimuth          = 278.12758368073
+    SlantDistance              = 407.63669110786 <km>
+    TargetCenterDistance       = 3801.9668782345 <km>
+    SubSpacecraftLatitude      = 0.87751764351502
+    SubSpacecraftLongitude     = 359.88759053086
+    SpacecraftAltitude         = 407.59017123958 <km>
+    OffNadirAngle              = 1.2269532845761
+    SubSpacecraftGroundAzimuth = 180.44183832306
+
+    # Sun Information
+    SunPosition                = (-150502526.56695, 155968057.68585,
+                                  -47649619.637854) <km>
+    SubSolarAzimuth            = 200.05937144229
+    SolarDistance              = 1.4834447008573 <AU>
+    SubSolarLatitude           = -12.398947274583
+    SubSolarLongitude          = 133.9783075778
+    SubSolarGroundAzimuth      = 106.10383229745
+
+    # Illumination and Other
+    Phase                      = 132.71638808591
+    Incidence                  = 133.10157206769
+    Emission                   = 1.374286646902
+    NorthAzimuth               = 97.694219514847
+
+    # Time
+    EphemerisTime              = 67428694.869346 <seconds>
+    UTC                        = 2002-02-19T22:10:30.6841257
+    LocalSolarTime             = 3.0606946159854 <hour>
+    SolarLongitude             = 329.70573073485
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:00.0
+    CpuTime     = 00:00:00.0
+  End_Group
+End_Object
+
+
+Object = thm2isis
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-05-16
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:43:37
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Import a Themis IR/VIS RDR or EDR"
+
+  Group = UserParameters
+    FROM       = /pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i0-
+                 08xxrdr/I00818003RDR.QUB
+    TO         = /scratch/jlaura/tmpW8WtSR/I00818003RDR
+    TIMEOFFSET = 0.0
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:01.0
+    CpuTime     = 00:00:00.4
+  End_Group
+End_Object
+
+
+Object = spiceinit
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-04-27
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:43:38
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Update SPICE data (kernels, pointing, and position) for
+                       a camera cube"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmpW8WtSR/I00818003RDR.cub
+    WEB          = false
+    ATTACH       = TRUE
+    CKSMITHED    = FALSE
+    CKRECON      = TRUE
+    CKPREDICTED  = FALSE
+    CKNADIR      = FALSE
+    SPKSMITHED   = FALSE
+    SPKRECON     = TRUE
+    SPKPREDICTED = FALSE
+    SHAPE        = SYSTEM
+    STARTPAD     = 0.0
+    ENDPAD       = 0.0
+    URL          = http://services.isis.astrogeology.usgs.gov/cgi-bin/spicein-
+                   it.cgi
+    PORT         = 80
+  End_Group
+
+  Group = Kernels
+    NaifFrameCode             = -53031
+    LeapSecond                = $base/kernels/lsk/naif0011.tls
+    TargetAttitudeShape       = $base/kernels/pck/pck00009.tpc
+    TargetPosition            = $base/kernels/spk/de405.bsp
+    InstrumentPointing        = ($odyssey/kernels/ck/m01_sc_map1_v2.bc,
+                                 $odyssey/kernels/fk/m01_v29.tf)
+    Instrument                = Null
+    SpacecraftClock           = $odyssey/kernels/sclk/ORB1_SCLKSCET.00210.tsc
+    InstrumentPosition        = $odyssey/kernels/spk/m01_map1_v2.bsp
+    InstrumentAddendum        = $odyssey/kernels/iak/themisAddendum003.ti
+    ShapeModel                = $base/dems/molaMarsPlanetaryRadius0005.cub
+    InstrumentPositionQuality = Reconstructed
+    InstrumentPointingQuality = Reconstructed
+    CameraVersion             = 2
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:01.0
+    CpuTime     = 00:00:00.6
+  End_Group
+End_Object
+
+
+Object = campt
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2013-02-25
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:43:39
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Computes geometric and photometric information at a
+                       given pixel location"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmpW8WtSR/I00818003RDR.cub
+    TO           = /scratch/jlaura/tmpW8WtSR/I00818003RDR_campt.pvl
+    FORMAT       = PVL
+    APPEND       = TRUE
+    TYPE         = IMAGE
+    ALLOWOUTSIDE = true
+  End_Group
+
+  Group = GroundPoint
+    Filename                   = /scratch/jlaura/tmpW8WtSR/I00818003RDR.cub
+    Sample                     = 160.0
+    Line                       = 3592.0
+    PixelValue                 = 2.9941204e-05
+    RightAscension             = 283.32666507065
+    Declination                = -31.622150131396
+    PlanetocentricLatitude     = 1.0248466252642
+    PlanetographicLatitude     = 1.0370158526088
+    PositiveEast360Longitude   = 359.88872681758
+    PositiveEast180Longitude   = -0.11127318241811
+    PositiveWest360Longitude   = 0.11127318241813
+    PositiveWest180Longitude   = 0.11127318241813
+    BodyFixedCoordinate        = (3393.8854737097, -6.5912169347033,
+                                  60.712842280426) <km>
+    LocalRadius                = 3394434.8722602 <meters>
+    SampleResolution           = 99.949512657054 <meters/pixel>
+    LineResolution             = 99.949512657054 <meters/pixel>
+
+    # Spacecraft Information
+    SpacecraftPosition         = (3801.5136632073, -7.4582575663582,
+                                  58.227021519281) <km>
+    SpacecraftAzimuth          = 278.12758368073
+    SlantDistance              = 407.63669110786 <km>
+    TargetCenterDistance       = 3801.9668782345 <km>
+    SubSpacecraftLatitude      = 0.87751764351502
+    SubSpacecraftLongitude     = 359.88759053086
+    SpacecraftAltitude         = 407.59017123958 <km>
+    OffNadirAngle              = 1.2269532845761
+    SubSpacecraftGroundAzimuth = 180.44183832306
+
+    # Sun Information
+    SunPosition                = (-150502526.56695, 155968057.68585,
+                                  -47649619.637854) <km>
+    SubSolarAzimuth            = 200.05937144229
+    SolarDistance              = 1.4834447008573 <AU>
+    SubSolarLatitude           = -12.398947274583
+    SubSolarLongitude          = 133.9783075778
+    SubSolarGroundAzimuth      = 106.10383229745
+
+    # Illumination and Other
+    Phase                      = 132.71638808591
+    Incidence                  = 133.10157206769
+    Emission                   = 1.374286646902
+    NorthAzimuth               = 97.694219514847
+
+    # Time
+    EphemerisTime              = 67428694.869346 <seconds>
+    UTC                        = 2002-02-19T22:10:30.6841257
+    LocalSolarTime             = 3.0606946159854 <hour>
+    SolarLongitude             = 329.70573073485
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:00.0
+    CpuTime     = 00:00:00.1
+  End_Group
+End_Object
+
+
+Object = thm2isis
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-05-16
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:44:13
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Import a Themis IR/VIS RDR or EDR"
+
+  Group = UserParameters
+    FROM       = /pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i0-
+                 08xxrdr/I00818003RDR.QUB
+    TO         = /scratch/jlaura/tmpLCWBhU/I00818003RDR
+    TIMEOFFSET = 0.0
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:00.0
+    CpuTime     = 00:00:00.4
+  End_Group
+End_Object
+
+
+Object = spiceinit
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-04-27
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:44:13
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Update SPICE data (kernels, pointing, and position) for
+                       a camera cube"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmpLCWBhU/I00818003RDR.cub
+    WEB          = false
+    ATTACH       = TRUE
+    CKSMITHED    = FALSE
+    CKRECON      = TRUE
+    CKPREDICTED  = FALSE
+    CKNADIR      = FALSE
+    SPKSMITHED   = FALSE
+    SPKRECON     = TRUE
+    SPKPREDICTED = FALSE
+    SHAPE        = SYSTEM
+    STARTPAD     = 0.0
+    ENDPAD       = 0.0
+    URL          = http://services.isis.astrogeology.usgs.gov/cgi-bin/spicein-
+                   it.cgi
+    PORT         = 80
+  End_Group
+
+  Group = Kernels
+    NaifFrameCode             = -53031
+    LeapSecond                = $base/kernels/lsk/naif0011.tls
+    TargetAttitudeShape       = $base/kernels/pck/pck00009.tpc
+    TargetPosition            = $base/kernels/spk/de405.bsp
+    InstrumentPointing        = ($odyssey/kernels/ck/m01_sc_map1_v2.bc,
+                                 $odyssey/kernels/fk/m01_v29.tf)
+    Instrument                = Null
+    SpacecraftClock           = $odyssey/kernels/sclk/ORB1_SCLKSCET.00210.tsc
+    InstrumentPosition        = $odyssey/kernels/spk/m01_map1_v2.bsp
+    InstrumentAddendum        = $odyssey/kernels/iak/themisAddendum003.ti
+    ShapeModel                = $base/dems/molaMarsPlanetaryRadius0005.cub
+    InstrumentPositionQuality = Reconstructed
+    InstrumentPointingQuality = Reconstructed
+    CameraVersion             = 2
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:01.0
+    CpuTime     = 00:00:00.6
+  End_Group
+End_Object
+
+
+Object = campt
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2013-02-25
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:44:14
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Computes geometric and photometric information at a
+                       given pixel location"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmpLCWBhU/I00818003RDR.cub
+    TO           = /scratch/jlaura/tmpLCWBhU/I00818003RDR_campt.pvl
+    FORMAT       = PVL
+    APPEND       = TRUE
+    TYPE         = IMAGE
+    ALLOWOUTSIDE = true
+  End_Group
+
+  Group = GroundPoint
+    Filename                   = /scratch/jlaura/tmpLCWBhU/I00818003RDR.cub
+    Sample                     = 160.0
+    Line                       = 3592.0
+    PixelValue                 = 2.9941204e-05
+    RightAscension             = 283.32666507065
+    Declination                = -31.622150131396
+    PlanetocentricLatitude     = 1.0248466252642
+    PlanetographicLatitude     = 1.0370158526088
+    PositiveEast360Longitude   = 359.88872681758
+    PositiveEast180Longitude   = -0.11127318241811
+    PositiveWest360Longitude   = 0.11127318241813
+    PositiveWest180Longitude   = 0.11127318241813
+    BodyFixedCoordinate        = (3393.8854737097, -6.5912169347033,
+                                  60.712842280426) <km>
+    LocalRadius                = 3394434.8722602 <meters>
+    SampleResolution           = 99.949512657054 <meters/pixel>
+    LineResolution             = 99.949512657054 <meters/pixel>
+
+    # Spacecraft Information
+    SpacecraftPosition         = (3801.5136632073, -7.4582575663582,
+                                  58.227021519281) <km>
+    SpacecraftAzimuth          = 278.12758368073
+    SlantDistance              = 407.63669110786 <km>
+    TargetCenterDistance       = 3801.9668782345 <km>
+    SubSpacecraftLatitude      = 0.87751764351502
+    SubSpacecraftLongitude     = 359.88759053086
+    SpacecraftAltitude         = 407.59017123958 <km>
+    OffNadirAngle              = 1.2269532845761
+    SubSpacecraftGroundAzimuth = 180.44183832306
+
+    # Sun Information
+    SunPosition                = (-150502526.56695, 155968057.68585,
+                                  -47649619.637854) <km>
+    SubSolarAzimuth            = 200.05937144229
+    SolarDistance              = 1.4834447008573 <AU>
+    SubSolarLatitude           = -12.398947274583
+    SubSolarLongitude          = 133.9783075778
+    SubSolarGroundAzimuth      = 106.10383229745
+
+    # Illumination and Other
+    Phase                      = 132.71638808591
+    Incidence                  = 133.10157206769
+    Emission                   = 1.374286646902
+    NorthAzimuth               = 97.694219514847
+
+    # Time
+    EphemerisTime              = 67428694.869346 <seconds>
+    UTC                        = 2002-02-19T22:10:30.6841257
+    LocalSolarTime             = 3.0606946159854 <hour>
+    SolarLongitude             = 329.70573073485
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:00.0
+    CpuTime     = 00:00:00.1
+  End_Group
+End_Object
+
+
+Object = thm2isis
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-05-16
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:44:40
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Import a Themis IR/VIS RDR or EDR"
+
+  Group = UserParameters
+    FROM       = /pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i0-
+                 08xxrdr/I00818003RDR.QUB
+    TO         = /scratch/jlaura/tmp4WHPkQ/I00818003RDR
+    TIMEOFFSET = 0.0
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:01.0
+    CpuTime     = 00:00:00.4
+  End_Group
+End_Object
+
+
+Object = spiceinit
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-04-27
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:44:41
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Update SPICE data (kernels, pointing, and position) for
+                       a camera cube"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmp4WHPkQ/I00818003RDR.cub
+    WEB          = false
+    ATTACH       = TRUE
+    CKSMITHED    = FALSE
+    CKRECON      = TRUE
+    CKPREDICTED  = FALSE
+    CKNADIR      = FALSE
+    SPKSMITHED   = FALSE
+    SPKRECON     = TRUE
+    SPKPREDICTED = FALSE
+    SHAPE        = SYSTEM
+    STARTPAD     = 0.0
+    ENDPAD       = 0.0
+    URL          = http://services.isis.astrogeology.usgs.gov/cgi-bin/spicein-
+                   it.cgi
+    PORT         = 80
+  End_Group
+
+  Group = Kernels
+    NaifFrameCode             = -53031
+    LeapSecond                = $base/kernels/lsk/naif0011.tls
+    TargetAttitudeShape       = $base/kernels/pck/pck00009.tpc
+    TargetPosition            = $base/kernels/spk/de405.bsp
+    InstrumentPointing        = ($odyssey/kernels/ck/m01_sc_map1_v2.bc,
+                                 $odyssey/kernels/fk/m01_v29.tf)
+    Instrument                = Null
+    SpacecraftClock           = $odyssey/kernels/sclk/ORB1_SCLKSCET.00210.tsc
+    InstrumentPosition        = $odyssey/kernels/spk/m01_map1_v2.bsp
+    InstrumentAddendum        = $odyssey/kernels/iak/themisAddendum003.ti
+    ShapeModel                = $base/dems/molaMarsPlanetaryRadius0005.cub
+    InstrumentPositionQuality = Reconstructed
+    InstrumentPointingQuality = Reconstructed
+    CameraVersion             = 2
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:01.0
+    CpuTime     = 00:00:00.6
+  End_Group
+End_Object
+
+
+Object = campt
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2013-02-25
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:44:42
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Computes geometric and photometric information at a
+                       given pixel location"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmp4WHPkQ/I00818003RDR.cub
+    TO           = /scratch/jlaura/tmp4WHPkQ/I00818003RDR_campt.pvl
+    FORMAT       = PVL
+    APPEND       = TRUE
+    TYPE         = IMAGE
+    ALLOWOUTSIDE = true
+  End_Group
+
+  Group = GroundPoint
+    Filename                   = /scratch/jlaura/tmp4WHPkQ/I00818003RDR.cub
+    Sample                     = 160.0
+    Line                       = 3592.0
+    PixelValue                 = 2.9941204e-05
+    RightAscension             = 283.32666507065
+    Declination                = -31.622150131396
+    PlanetocentricLatitude     = 1.0248466252642
+    PlanetographicLatitude     = 1.0370158526088
+    PositiveEast360Longitude   = 359.88872681758
+    PositiveEast180Longitude   = -0.11127318241811
+    PositiveWest360Longitude   = 0.11127318241813
+    PositiveWest180Longitude   = 0.11127318241813
+    BodyFixedCoordinate        = (3393.8854737097, -6.5912169347033,
+                                  60.712842280426) <km>
+    LocalRadius                = 3394434.8722602 <meters>
+    SampleResolution           = 99.949512657054 <meters/pixel>
+    LineResolution             = 99.949512657054 <meters/pixel>
+
+    # Spacecraft Information
+    SpacecraftPosition         = (3801.5136632073, -7.4582575663582,
+                                  58.227021519281) <km>
+    SpacecraftAzimuth          = 278.12758368073
+    SlantDistance              = 407.63669110786 <km>
+    TargetCenterDistance       = 3801.9668782345 <km>
+    SubSpacecraftLatitude      = 0.87751764351502
+    SubSpacecraftLongitude     = 359.88759053086
+    SpacecraftAltitude         = 407.59017123958 <km>
+    OffNadirAngle              = 1.2269532845761
+    SubSpacecraftGroundAzimuth = 180.44183832306
+
+    # Sun Information
+    SunPosition                = (-150502526.56695, 155968057.68585,
+                                  -47649619.637854) <km>
+    SubSolarAzimuth            = 200.05937144229
+    SolarDistance              = 1.4834447008573 <AU>
+    SubSolarLatitude           = -12.398947274583
+    SubSolarLongitude          = 133.9783075778
+    SubSolarGroundAzimuth      = 106.10383229745
+
+    # Illumination and Other
+    Phase                      = 132.71638808591
+    Incidence                  = 133.10157206769
+    Emission                   = 1.374286646902
+    NorthAzimuth               = 97.694219514847
+
+    # Time
+    EphemerisTime              = 67428694.869346 <seconds>
+    UTC                        = 2002-02-19T22:10:30.6841257
+    LocalSolarTime             = 3.0606946159854 <hour>
+    SolarLongitude             = 329.70573073485
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:00.0
+    CpuTime     = 00:00:00.1
+  End_Group
+End_Object
+
+
+Object = thm2isis
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-05-16
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:45:02
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Import a Themis IR/VIS RDR or EDR"
+
+  Group = UserParameters
+    FROM       = /pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i0-
+                 08xxrdr/I00818003RDR.QUB
+    TO         = /scratch/jlaura/tmpA4G9jG/I00818003RDR
+    TIMEOFFSET = 0.0
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:00.0
+    CpuTime     = 00:00:00.4
+  End_Group
+End_Object
+
+
+Object = spiceinit
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-04-27
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:45:02
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Update SPICE data (kernels, pointing, and position) for
+                       a camera cube"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmpA4G9jG/I00818003RDR.cub
+    WEB          = false
+    ATTACH       = TRUE
+    CKSMITHED    = FALSE
+    CKRECON      = TRUE
+    CKPREDICTED  = FALSE
+    CKNADIR      = FALSE
+    SPKSMITHED   = FALSE
+    SPKRECON     = TRUE
+    SPKPREDICTED = FALSE
+    SHAPE        = SYSTEM
+    STARTPAD     = 0.0
+    ENDPAD       = 0.0
+    URL          = http://services.isis.astrogeology.usgs.gov/cgi-bin/spicein-
+                   it.cgi
+    PORT         = 80
+  End_Group
+
+  Group = Kernels
+    NaifFrameCode             = -53031
+    LeapSecond                = $base/kernels/lsk/naif0011.tls
+    TargetAttitudeShape       = $base/kernels/pck/pck00009.tpc
+    TargetPosition            = $base/kernels/spk/de405.bsp
+    InstrumentPointing        = ($odyssey/kernels/ck/m01_sc_map1_v2.bc,
+                                 $odyssey/kernels/fk/m01_v29.tf)
+    Instrument                = Null
+    SpacecraftClock           = $odyssey/kernels/sclk/ORB1_SCLKSCET.00210.tsc
+    InstrumentPosition        = $odyssey/kernels/spk/m01_map1_v2.bsp
+    InstrumentAddendum        = $odyssey/kernels/iak/themisAddendum003.ti
+    ShapeModel                = $base/dems/molaMarsPlanetaryRadius0005.cub
+    InstrumentPositionQuality = Reconstructed
+    InstrumentPointingQuality = Reconstructed
+    CameraVersion             = 2
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:01.0
+    CpuTime     = 00:00:00.6
+  End_Group
+End_Object
+
+
+Object = campt
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2013-02-25
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:45:03
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Computes geometric and photometric information at a
+                       given pixel location"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmpA4G9jG/I00818003RDR.cub
+    TO           = /scratch/jlaura/tmpA4G9jG/I00818003RDR_campt.pvl
+    FORMAT       = PVL
+    APPEND       = TRUE
+    TYPE         = IMAGE
+    ALLOWOUTSIDE = true
+  End_Group
+
+  Group = GroundPoint
+    Filename                   = /scratch/jlaura/tmpA4G9jG/I00818003RDR.cub
+    Sample                     = 160.0
+    Line                       = 3592.0
+    PixelValue                 = 2.9941204e-05
+    RightAscension             = 283.32666507065
+    Declination                = -31.622150131396
+    PlanetocentricLatitude     = 1.0248466252642
+    PlanetographicLatitude     = 1.0370158526088
+    PositiveEast360Longitude   = 359.88872681758
+    PositiveEast180Longitude   = -0.11127318241811
+    PositiveWest360Longitude   = 0.11127318241813
+    PositiveWest180Longitude   = 0.11127318241813
+    BodyFixedCoordinate        = (3393.8854737097, -6.5912169347033,
+                                  60.712842280426) <km>
+    LocalRadius                = 3394434.8722602 <meters>
+    SampleResolution           = 99.949512657054 <meters/pixel>
+    LineResolution             = 99.949512657054 <meters/pixel>
+
+    # Spacecraft Information
+    SpacecraftPosition         = (3801.5136632073, -7.4582575663582,
+                                  58.227021519281) <km>
+    SpacecraftAzimuth          = 278.12758368073
+    SlantDistance              = 407.63669110786 <km>
+    TargetCenterDistance       = 3801.9668782345 <km>
+    SubSpacecraftLatitude      = 0.87751764351502
+    SubSpacecraftLongitude     = 359.88759053086
+    SpacecraftAltitude         = 407.59017123958 <km>
+    OffNadirAngle              = 1.2269532845761
+    SubSpacecraftGroundAzimuth = 180.44183832306
+
+    # Sun Information
+    SunPosition                = (-150502526.56695, 155968057.68585,
+                                  -47649619.637854) <km>
+    SubSolarAzimuth            = 200.05937144229
+    SolarDistance              = 1.4834447008573 <AU>
+    SubSolarLatitude           = -12.398947274583
+    SubSolarLongitude          = 133.9783075778
+    SubSolarGroundAzimuth      = 106.10383229745
+
+    # Illumination and Other
+    Phase                      = 132.71638808591
+    Incidence                  = 133.10157206769
+    Emission                   = 1.374286646902
+    NorthAzimuth               = 97.694219514847
+
+    # Time
+    EphemerisTime              = 67428694.869346 <seconds>
+    UTC                        = 2002-02-19T22:10:30.6841257
+    LocalSolarTime             = 3.0606946159854 <hour>
+    SolarLongitude             = 329.70573073485
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:00.0
+    CpuTime     = 00:00:00.0
+  End_Group
+End_Object
+
+
+Object = thm2isis
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-05-16
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:45:05
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Import a Themis IR/VIS RDR or EDR"
+
+  Group = UserParameters
+    FROM       = /pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i0-
+                 08xxrdr/I00818003RDR.QUB
+    TO         = /tmp/dv_25626/I00818003RDR.I3.cub
+    TIMEOFFSET = 0.0
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:01.0
+    CpuTime     = 00:00:00.4
+  End_Group
+End_Object
+
+
+Object = thm2isis
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-05-16
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:46:18
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Import a Themis IR/VIS RDR or EDR"
+
+  Group = UserParameters
+    FROM       = /pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i0-
+                 08xxrdr/I00818003RDR.QUB
+    TO         = /scratch/jlaura/tmpS_OZ_f/I00818003RDR
+    TIMEOFFSET = 0.0
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:00.0
+    CpuTime     = 00:00:00.4
+  End_Group
+End_Object
+
+
+Object = spiceinit
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-04-27
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:46:18
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Update SPICE data (kernels, pointing, and position) for
+                       a camera cube"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmpS_OZ_f/I00818003RDR.cub
+    WEB          = false
+    ATTACH       = TRUE
+    CKSMITHED    = FALSE
+    CKRECON      = TRUE
+    CKPREDICTED  = FALSE
+    CKNADIR      = FALSE
+    SPKSMITHED   = FALSE
+    SPKRECON     = TRUE
+    SPKPREDICTED = FALSE
+    SHAPE        = SYSTEM
+    STARTPAD     = 0.0
+    ENDPAD       = 0.0
+    URL          = http://services.isis.astrogeology.usgs.gov/cgi-bin/spicein-
+                   it.cgi
+    PORT         = 80
+  End_Group
+
+  Group = Kernels
+    NaifFrameCode             = -53031
+    LeapSecond                = $base/kernels/lsk/naif0011.tls
+    TargetAttitudeShape       = $base/kernels/pck/pck00009.tpc
+    TargetPosition            = $base/kernels/spk/de405.bsp
+    InstrumentPointing        = ($odyssey/kernels/ck/m01_sc_map1_v2.bc,
+                                 $odyssey/kernels/fk/m01_v29.tf)
+    Instrument                = Null
+    SpacecraftClock           = $odyssey/kernels/sclk/ORB1_SCLKSCET.00210.tsc
+    InstrumentPosition        = $odyssey/kernels/spk/m01_map1_v2.bsp
+    InstrumentAddendum        = $odyssey/kernels/iak/themisAddendum003.ti
+    ShapeModel                = $base/dems/molaMarsPlanetaryRadius0005.cub
+    InstrumentPositionQuality = Reconstructed
+    InstrumentPointingQuality = Reconstructed
+    CameraVersion             = 2
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:01.0
+    CpuTime     = 00:00:00.6
+  End_Group
+End_Object
+
+
+Object = campt
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2013-02-25
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:46:19
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Computes geometric and photometric information at a
+                       given pixel location"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmpS_OZ_f/I00818003RDR.cub
+    TO           = /scratch/jlaura/tmpS_OZ_f/I00818003RDR_campt.pvl
+    FORMAT       = PVL
+    APPEND       = TRUE
+    TYPE         = IMAGE
+    ALLOWOUTSIDE = true
+  End_Group
+
+  Group = GroundPoint
+    Filename                   = /scratch/jlaura/tmpS_OZ_f/I00818003RDR.cub
+    Sample                     = 160.0
+    Line                       = 3592.0
+    PixelValue                 = 2.9941204e-05
+    RightAscension             = 283.32666507065
+    Declination                = -31.622150131396
+    PlanetocentricLatitude     = 1.0248466252642
+    PlanetographicLatitude     = 1.0370158526088
+    PositiveEast360Longitude   = 359.88872681758
+    PositiveEast180Longitude   = -0.11127318241811
+    PositiveWest360Longitude   = 0.11127318241813
+    PositiveWest180Longitude   = 0.11127318241813
+    BodyFixedCoordinate        = (3393.8854737097, -6.5912169347033,
+                                  60.712842280426) <km>
+    LocalRadius                = 3394434.8722602 <meters>
+    SampleResolution           = 99.949512657054 <meters/pixel>
+    LineResolution             = 99.949512657054 <meters/pixel>
+
+    # Spacecraft Information
+    SpacecraftPosition         = (3801.5136632073, -7.4582575663582,
+                                  58.227021519281) <km>
+    SpacecraftAzimuth          = 278.12758368073
+    SlantDistance              = 407.63669110786 <km>
+    TargetCenterDistance       = 3801.9668782345 <km>
+    SubSpacecraftLatitude      = 0.87751764351502
+    SubSpacecraftLongitude     = 359.88759053086
+    SpacecraftAltitude         = 407.59017123958 <km>
+    OffNadirAngle              = 1.2269532845761
+    SubSpacecraftGroundAzimuth = 180.44183832306
+
+    # Sun Information
+    SunPosition                = (-150502526.56695, 155968057.68585,
+                                  -47649619.637854) <km>
+    SubSolarAzimuth            = 200.05937144229
+    SolarDistance              = 1.4834447008573 <AU>
+    SubSolarLatitude           = -12.398947274583
+    SubSolarLongitude          = 133.9783075778
+    SubSolarGroundAzimuth      = 106.10383229745
+
+    # Illumination and Other
+    Phase                      = 132.71638808591
+    Incidence                  = 133.10157206769
+    Emission                   = 1.374286646902
+    NorthAzimuth               = 97.694219514847
+
+    # Time
+    EphemerisTime              = 67428694.869346 <seconds>
+    UTC                        = 2002-02-19T22:10:30.6841257
+    LocalSolarTime             = 3.0606946159854 <hour>
+    SolarLongitude             = 329.70573073485
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:00.0
+    CpuTime     = 00:00:00.1
+  End_Group
+End_Object
+
+
+Object = thm2isis
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-05-16
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:48:15
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Import a Themis IR/VIS RDR or EDR"
+
+  Group = UserParameters
+    FROM       = /pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i0-
+                 08xxrdr/I00818003RDR.QUB
+    TO         = /scratch/jlaura/tmpBSkjtd/I00818003RDR
+    TIMEOFFSET = 0.0
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:00.0
+    CpuTime     = 00:00:00.4
+  End_Group
+End_Object
+
+
+Object = spiceinit
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-04-27
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:48:15
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Update SPICE data (kernels, pointing, and position) for
+                       a camera cube"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmpBSkjtd/I00818003RDR.cub
+    WEB          = false
+    ATTACH       = TRUE
+    CKSMITHED    = FALSE
+    CKRECON      = TRUE
+    CKPREDICTED  = FALSE
+    CKNADIR      = FALSE
+    SPKSMITHED   = FALSE
+    SPKRECON     = TRUE
+    SPKPREDICTED = FALSE
+    SHAPE        = SYSTEM
+    STARTPAD     = 0.0
+    ENDPAD       = 0.0
+    URL          = http://services.isis.astrogeology.usgs.gov/cgi-bin/spicein-
+                   it.cgi
+    PORT         = 80
+  End_Group
+
+  Group = Kernels
+    NaifFrameCode             = -53031
+    LeapSecond                = $base/kernels/lsk/naif0011.tls
+    TargetAttitudeShape       = $base/kernels/pck/pck00009.tpc
+    TargetPosition            = $base/kernels/spk/de405.bsp
+    InstrumentPointing        = ($odyssey/kernels/ck/m01_sc_map1_v2.bc,
+                                 $odyssey/kernels/fk/m01_v29.tf)
+    Instrument                = Null
+    SpacecraftClock           = $odyssey/kernels/sclk/ORB1_SCLKSCET.00210.tsc
+    InstrumentPosition        = $odyssey/kernels/spk/m01_map1_v2.bsp
+    InstrumentAddendum        = $odyssey/kernels/iak/themisAddendum003.ti
+    ShapeModel                = $base/dems/molaMarsPlanetaryRadius0005.cub
+    InstrumentPositionQuality = Reconstructed
+    InstrumentPointingQuality = Reconstructed
+    CameraVersion             = 2
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:02.0
+    CpuTime     = 00:00:00.6
+  End_Group
+End_Object
+
+
+Object = campt
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2013-02-25
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:48:17
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Computes geometric and photometric information at a
+                       given pixel location"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmpBSkjtd/I00818003RDR.cub
+    TO           = /scratch/jlaura/tmpBSkjtd/I00818003RDR_campt.pvl
+    FORMAT       = PVL
+    APPEND       = TRUE
+    TYPE         = IMAGE
+    ALLOWOUTSIDE = true
+  End_Group
+
+  Group = GroundPoint
+    Filename                   = /scratch/jlaura/tmpBSkjtd/I00818003RDR.cub
+    Sample                     = 160.0
+    Line                       = 3592.0
+    PixelValue                 = 2.9941204e-05
+    RightAscension             = 283.32666507065
+    Declination                = -31.622150131396
+    PlanetocentricLatitude     = 1.0248466252642
+    PlanetographicLatitude     = 1.0370158526088
+    PositiveEast360Longitude   = 359.88872681758
+    PositiveEast180Longitude   = -0.11127318241811
+    PositiveWest360Longitude   = 0.11127318241813
+    PositiveWest180Longitude   = 0.11127318241813
+    BodyFixedCoordinate        = (3393.8854737097, -6.5912169347033,
+                                  60.712842280426) <km>
+    LocalRadius                = 3394434.8722602 <meters>
+    SampleResolution           = 99.949512657054 <meters/pixel>
+    LineResolution             = 99.949512657054 <meters/pixel>
+
+    # Spacecraft Information
+    SpacecraftPosition         = (3801.5136632073, -7.4582575663582,
+                                  58.227021519281) <km>
+    SpacecraftAzimuth          = 278.12758368073
+    SlantDistance              = 407.63669110786 <km>
+    TargetCenterDistance       = 3801.9668782345 <km>
+    SubSpacecraftLatitude      = 0.87751764351502
+    SubSpacecraftLongitude     = 359.88759053086
+    SpacecraftAltitude         = 407.59017123958 <km>
+    OffNadirAngle              = 1.2269532845761
+    SubSpacecraftGroundAzimuth = 180.44183832306
+
+    # Sun Information
+    SunPosition                = (-150502526.56695, 155968057.68585,
+                                  -47649619.637854) <km>
+    SubSolarAzimuth            = 200.05937144229
+    SolarDistance              = 1.4834447008573 <AU>
+    SubSolarLatitude           = -12.398947274583
+    SubSolarLongitude          = 133.9783075778
+    SubSolarGroundAzimuth      = 106.10383229745
+
+    # Illumination and Other
+    Phase                      = 132.71638808591
+    Incidence                  = 133.10157206769
+    Emission                   = 1.374286646902
+    NorthAzimuth               = 97.694219514847
+
+    # Time
+    EphemerisTime              = 67428694.869346 <seconds>
+    UTC                        = 2002-02-19T22:10:30.6841257
+    LocalSolarTime             = 3.0606946159854 <hour>
+    SolarLongitude             = 329.70573073485
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:00.0
+    CpuTime     = 00:00:00.0
+  End_Group
+End_Object
+
+
+Object = thm2isis
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-05-16
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:48:30
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Import a Themis IR/VIS RDR or EDR"
+
+  Group = UserParameters
+    FROM       = /pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i0-
+                 08xxrdr/I00818003RDR.QUB
+    TO         = /scratch/jlaura/tmpQIKcW7/I00818003RDR
+    TIMEOFFSET = 0.0
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:00.0
+    CpuTime     = 00:00:00.4
+  End_Group
+End_Object
+
+
+Object = spiceinit
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-04-27
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:48:30
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Update SPICE data (kernels, pointing, and position) for
+                       a camera cube"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmpQIKcW7/I00818003RDR.cub
+    WEB          = false
+    ATTACH       = TRUE
+    CKSMITHED    = FALSE
+    CKRECON      = TRUE
+    CKPREDICTED  = FALSE
+    CKNADIR      = FALSE
+    SPKSMITHED   = FALSE
+    SPKRECON     = TRUE
+    SPKPREDICTED = FALSE
+    SHAPE        = SYSTEM
+    STARTPAD     = 0.0
+    ENDPAD       = 0.0
+    URL          = http://services.isis.astrogeology.usgs.gov/cgi-bin/spicein-
+                   it.cgi
+    PORT         = 80
+  End_Group
+
+  Group = Kernels
+    NaifFrameCode             = -53031
+    LeapSecond                = $base/kernels/lsk/naif0011.tls
+    TargetAttitudeShape       = $base/kernels/pck/pck00009.tpc
+    TargetPosition            = $base/kernels/spk/de405.bsp
+    InstrumentPointing        = ($odyssey/kernels/ck/m01_sc_map1_v2.bc,
+                                 $odyssey/kernels/fk/m01_v29.tf)
+    Instrument                = Null
+    SpacecraftClock           = $odyssey/kernels/sclk/ORB1_SCLKSCET.00210.tsc
+    InstrumentPosition        = $odyssey/kernels/spk/m01_map1_v2.bsp
+    InstrumentAddendum        = $odyssey/kernels/iak/themisAddendum003.ti
+    ShapeModel                = $base/dems/molaMarsPlanetaryRadius0005.cub
+    InstrumentPositionQuality = Reconstructed
+    InstrumentPointingQuality = Reconstructed
+    CameraVersion             = 2
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:01.0
+    CpuTime     = 00:00:00.6
+  End_Group
+End_Object
+
+
+Object = campt
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2013-02-25
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:48:31
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Computes geometric and photometric information at a
+                       given pixel location"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmpQIKcW7/I00818003RDR.cub
+    TO           = /scratch/jlaura/tmpQIKcW7/I00818003RDR_campt.pvl
+    FORMAT       = PVL
+    APPEND       = TRUE
+    TYPE         = IMAGE
+    ALLOWOUTSIDE = true
+  End_Group
+
+  Group = GroundPoint
+    Filename                   = /scratch/jlaura/tmpQIKcW7/I00818003RDR.cub
+    Sample                     = 160.0
+    Line                       = 3592.0
+    PixelValue                 = 2.9941204e-05
+    RightAscension             = 283.32666507065
+    Declination                = -31.622150131396
+    PlanetocentricLatitude     = 1.0248466252642
+    PlanetographicLatitude     = 1.0370158526088
+    PositiveEast360Longitude   = 359.88872681758
+    PositiveEast180Longitude   = -0.11127318241811
+    PositiveWest360Longitude   = 0.11127318241813
+    PositiveWest180Longitude   = 0.11127318241813
+    BodyFixedCoordinate        = (3393.8854737097, -6.5912169347033,
+                                  60.712842280426) <km>
+    LocalRadius                = 3394434.8722602 <meters>
+    SampleResolution           = 99.949512657054 <meters/pixel>
+    LineResolution             = 99.949512657054 <meters/pixel>
+
+    # Spacecraft Information
+    SpacecraftPosition         = (3801.5136632073, -7.4582575663582,
+                                  58.227021519281) <km>
+    SpacecraftAzimuth          = 278.12758368073
+    SlantDistance              = 407.63669110786 <km>
+    TargetCenterDistance       = 3801.9668782345 <km>
+    SubSpacecraftLatitude      = 0.87751764351502
+    SubSpacecraftLongitude     = 359.88759053086
+    SpacecraftAltitude         = 407.59017123958 <km>
+    OffNadirAngle              = 1.2269532845761
+    SubSpacecraftGroundAzimuth = 180.44183832306
+
+    # Sun Information
+    SunPosition                = (-150502526.56695, 155968057.68585,
+                                  -47649619.637854) <km>
+    SubSolarAzimuth            = 200.05937144229
+    SolarDistance              = 1.4834447008573 <AU>
+    SubSolarLatitude           = -12.398947274583
+    SubSolarLongitude          = 133.9783075778
+    SubSolarGroundAzimuth      = 106.10383229745
+
+    # Illumination and Other
+    Phase                      = 132.71638808591
+    Incidence                  = 133.10157206769
+    Emission                   = 1.374286646902
+    NorthAzimuth               = 97.694219514847
+
+    # Time
+    EphemerisTime              = 67428694.869346 <seconds>
+    UTC                        = 2002-02-19T22:10:30.6841257
+    LocalSolarTime             = 3.0606946159854 <hour>
+    SolarLongitude             = 329.70573073485
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:00.0
+    CpuTime     = 00:00:00.1
+  End_Group
+End_Object
+
+
+Object = thm2isis
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-05-16
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:48:33
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Import a Themis IR/VIS RDR or EDR"
+
+  Group = UserParameters
+    FROM       = /pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i0-
+                 08xxrdr/I00818003RDR.QUB
+    TO         = /tmp/dv_25852/I00818003RDR.I3.cub
+    TIMEOFFSET = 0.0
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:01.0
+    CpuTime     = 00:00:00.4
+  End_Group
+End_Object
+
+
+Object = thm2isis
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-05-16
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:50:35
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Import a Themis IR/VIS RDR or EDR"
+
+  Group = UserParameters
+    FROM       = /pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i0-
+                 08xxrdr/I00818003RDR.QUB
+    TO         = /scratch/jlaura/tmpH3AjA7/I00818003RDR
+    TIMEOFFSET = 0.0
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:00.0
+    CpuTime     = 00:00:00.4
+  End_Group
+End_Object
+
+
+Object = spiceinit
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-04-27
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:50:35
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Update SPICE data (kernels, pointing, and position) for
+                       a camera cube"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmpH3AjA7/I00818003RDR.cub
+    WEB          = false
+    ATTACH       = TRUE
+    CKSMITHED    = FALSE
+    CKRECON      = TRUE
+    CKPREDICTED  = FALSE
+    CKNADIR      = FALSE
+    SPKSMITHED   = FALSE
+    SPKRECON     = TRUE
+    SPKPREDICTED = FALSE
+    SHAPE        = SYSTEM
+    STARTPAD     = 0.0
+    ENDPAD       = 0.0
+    URL          = http://services.isis.astrogeology.usgs.gov/cgi-bin/spicein-
+                   it.cgi
+    PORT         = 80
+  End_Group
+
+  Group = Kernels
+    NaifFrameCode             = -53031
+    LeapSecond                = $base/kernels/lsk/naif0011.tls
+    TargetAttitudeShape       = $base/kernels/pck/pck00009.tpc
+    TargetPosition            = $base/kernels/spk/de405.bsp
+    InstrumentPointing        = ($odyssey/kernels/ck/m01_sc_map1_v2.bc,
+                                 $odyssey/kernels/fk/m01_v29.tf)
+    Instrument                = Null
+    SpacecraftClock           = $odyssey/kernels/sclk/ORB1_SCLKSCET.00210.tsc
+    InstrumentPosition        = $odyssey/kernels/spk/m01_map1_v2.bsp
+    InstrumentAddendum        = $odyssey/kernels/iak/themisAddendum003.ti
+    ShapeModel                = $base/dems/molaMarsPlanetaryRadius0005.cub
+    InstrumentPositionQuality = Reconstructed
+    InstrumentPointingQuality = Reconstructed
+    CameraVersion             = 2
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:01.0
+    CpuTime     = 00:00:00.6
+  End_Group
+End_Object
+
+
+Object = campt
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2013-02-25
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:50:36
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Computes geometric and photometric information at a
+                       given pixel location"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmpH3AjA7/I00818003RDR.cub
+    TO           = /scratch/jlaura/tmpH3AjA7/I00818003RDR_campt.pvl
+    FORMAT       = PVL
+    APPEND       = TRUE
+    TYPE         = IMAGE
+    ALLOWOUTSIDE = true
+  End_Group
+
+  Group = GroundPoint
+    Filename                   = /scratch/jlaura/tmpH3AjA7/I00818003RDR.cub
+    Sample                     = 160.0
+    Line                       = 3592.0
+    PixelValue                 = 2.9941204e-05
+    RightAscension             = 283.32666507065
+    Declination                = -31.622150131396
+    PlanetocentricLatitude     = 1.0248466252642
+    PlanetographicLatitude     = 1.0370158526088
+    PositiveEast360Longitude   = 359.88872681758
+    PositiveEast180Longitude   = -0.11127318241811
+    PositiveWest360Longitude   = 0.11127318241813
+    PositiveWest180Longitude   = 0.11127318241813
+    BodyFixedCoordinate        = (3393.8854737097, -6.5912169347033,
+                                  60.712842280426) <km>
+    LocalRadius                = 3394434.8722602 <meters>
+    SampleResolution           = 99.949512657054 <meters/pixel>
+    LineResolution             = 99.949512657054 <meters/pixel>
+
+    # Spacecraft Information
+    SpacecraftPosition         = (3801.5136632073, -7.4582575663582,
+                                  58.227021519281) <km>
+    SpacecraftAzimuth          = 278.12758368073
+    SlantDistance              = 407.63669110786 <km>
+    TargetCenterDistance       = 3801.9668782345 <km>
+    SubSpacecraftLatitude      = 0.87751764351502
+    SubSpacecraftLongitude     = 359.88759053086
+    SpacecraftAltitude         = 407.59017123958 <km>
+    OffNadirAngle              = 1.2269532845761
+    SubSpacecraftGroundAzimuth = 180.44183832306
+
+    # Sun Information
+    SunPosition                = (-150502526.56695, 155968057.68585,
+                                  -47649619.637854) <km>
+    SubSolarAzimuth            = 200.05937144229
+    SolarDistance              = 1.4834447008573 <AU>
+    SubSolarLatitude           = -12.398947274583
+    SubSolarLongitude          = 133.9783075778
+    SubSolarGroundAzimuth      = 106.10383229745
+
+    # Illumination and Other
+    Phase                      = 132.71638808591
+    Incidence                  = 133.10157206769
+    Emission                   = 1.374286646902
+    NorthAzimuth               = 97.694219514847
+
+    # Time
+    EphemerisTime              = 67428694.869346 <seconds>
+    UTC                        = 2002-02-19T22:10:30.6841257
+    LocalSolarTime             = 3.0606946159854 <hour>
+    SolarLongitude             = 329.70573073485
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:00.0
+    CpuTime     = 00:00:00.1
+  End_Group
+End_Object
+
+
+Object = thm2isis
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-05-16
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:50:38
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Import a Themis IR/VIS RDR or EDR"
+
+  Group = UserParameters
+    FROM       = /pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i0-
+                 08xxrdr/I00818003RDR.QUB
+    TO         = /tmp/dv_25911/I00818003RDR.I3.cub
+    TIMEOFFSET = 0.0
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:01.0
+    CpuTime     = 00:00:00.3
+  End_Group
+End_Object
+
+
+Object = thm2isis
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-05-16
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:52:09
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Import a Themis IR/VIS RDR or EDR"
+
+  Group = UserParameters
+    FROM       = /pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i0-
+                 08xxrdr/I00818003RDR.QUB
+    TO         = /scratch/jlaura/tmp6KDXHD/I00818003RDR
+    TIMEOFFSET = 0.0
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:00.0
+    CpuTime     = 00:00:00.4
+  End_Group
+End_Object
+
+
+Object = spiceinit
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-04-27
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:52:09
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Update SPICE data (kernels, pointing, and position) for
+                       a camera cube"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmp6KDXHD/I00818003RDR.cub
+    WEB          = false
+    ATTACH       = TRUE
+    CKSMITHED    = FALSE
+    CKRECON      = TRUE
+    CKPREDICTED  = FALSE
+    CKNADIR      = FALSE
+    SPKSMITHED   = FALSE
+    SPKRECON     = TRUE
+    SPKPREDICTED = FALSE
+    SHAPE        = SYSTEM
+    STARTPAD     = 0.0
+    ENDPAD       = 0.0
+    URL          = http://services.isis.astrogeology.usgs.gov/cgi-bin/spicein-
+                   it.cgi
+    PORT         = 80
+  End_Group
+
+  Group = Kernels
+    NaifFrameCode             = -53031
+    LeapSecond                = $base/kernels/lsk/naif0011.tls
+    TargetAttitudeShape       = $base/kernels/pck/pck00009.tpc
+    TargetPosition            = $base/kernels/spk/de405.bsp
+    InstrumentPointing        = ($odyssey/kernels/ck/m01_sc_map1_v2.bc,
+                                 $odyssey/kernels/fk/m01_v29.tf)
+    Instrument                = Null
+    SpacecraftClock           = $odyssey/kernels/sclk/ORB1_SCLKSCET.00210.tsc
+    InstrumentPosition        = $odyssey/kernels/spk/m01_map1_v2.bsp
+    InstrumentAddendum        = $odyssey/kernels/iak/themisAddendum003.ti
+    ShapeModel                = $base/dems/molaMarsPlanetaryRadius0005.cub
+    InstrumentPositionQuality = Reconstructed
+    InstrumentPointingQuality = Reconstructed
+    CameraVersion             = 2
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:02.0
+    CpuTime     = 00:00:00.6
+  End_Group
+End_Object
+
+
+Object = campt
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2013-02-25
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:52:11
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Computes geometric and photometric information at a
+                       given pixel location"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmp6KDXHD/I00818003RDR.cub
+    TO           = /scratch/jlaura/tmp6KDXHD/I00818003RDR_campt.pvl
+    FORMAT       = PVL
+    APPEND       = TRUE
+    TYPE         = IMAGE
+    ALLOWOUTSIDE = true
+  End_Group
+
+  Group = GroundPoint
+    Filename                   = /scratch/jlaura/tmp6KDXHD/I00818003RDR.cub
+    Sample                     = 160.0
+    Line                       = 3592.0
+    PixelValue                 = 2.9941204e-05
+    RightAscension             = 283.32666507065
+    Declination                = -31.622150131396
+    PlanetocentricLatitude     = 1.0248466252642
+    PlanetographicLatitude     = 1.0370158526088
+    PositiveEast360Longitude   = 359.88872681758
+    PositiveEast180Longitude   = -0.11127318241811
+    PositiveWest360Longitude   = 0.11127318241813
+    PositiveWest180Longitude   = 0.11127318241813
+    BodyFixedCoordinate        = (3393.8854737097, -6.5912169347033,
+                                  60.712842280426) <km>
+    LocalRadius                = 3394434.8722602 <meters>
+    SampleResolution           = 99.949512657054 <meters/pixel>
+    LineResolution             = 99.949512657054 <meters/pixel>
+
+    # Spacecraft Information
+    SpacecraftPosition         = (3801.5136632073, -7.4582575663582,
+                                  58.227021519281) <km>
+    SpacecraftAzimuth          = 278.12758368073
+    SlantDistance              = 407.63669110786 <km>
+    TargetCenterDistance       = 3801.9668782345 <km>
+    SubSpacecraftLatitude      = 0.87751764351502
+    SubSpacecraftLongitude     = 359.88759053086
+    SpacecraftAltitude         = 407.59017123958 <km>
+    OffNadirAngle              = 1.2269532845761
+    SubSpacecraftGroundAzimuth = 180.44183832306
+
+    # Sun Information
+    SunPosition                = (-150502526.56695, 155968057.68585,
+                                  -47649619.637854) <km>
+    SubSolarAzimuth            = 200.05937144229
+    SolarDistance              = 1.4834447008573 <AU>
+    SubSolarLatitude           = -12.398947274583
+    SubSolarLongitude          = 133.9783075778
+    SubSolarGroundAzimuth      = 106.10383229745
+
+    # Illumination and Other
+    Phase                      = 132.71638808591
+    Incidence                  = 133.10157206769
+    Emission                   = 1.374286646902
+    NorthAzimuth               = 97.694219514847
+
+    # Time
+    EphemerisTime              = 67428694.869346 <seconds>
+    UTC                        = 2002-02-19T22:10:30.6841257
+    LocalSolarTime             = 3.0606946159854 <hour>
+    SolarLongitude             = 329.70573073485
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:00.0
+    CpuTime     = 00:00:00.1
+  End_Group
+End_Object
+
+
+Object = thm2isis
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-05-16
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:52:13
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Import a Themis IR/VIS RDR or EDR"
+
+  Group = UserParameters
+    FROM       = /pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i0-
+                 08xxrdr/I00818003RDR.QUB
+    TO         = /tmp/dv_25976/I00818003RDR.I3.cub
+    TIMEOFFSET = 0.0
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:00.0
+    CpuTime     = 00:00:00.4
+  End_Group
+End_Object
+
+
+Object = spiceinit
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2014-04-27
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:52:13
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Update SPICE data (kernels, pointing, and position) for
+                       a camera cube"
+
+  Group = UserParameters
+    FROM         = /scratch/jlaura/tmp6KDXHD/I00818003RDR_dvprocessed.cub
+    WEB          = false
+    ATTACH       = TRUE
+    CKSMITHED    = FALSE
+    CKRECON      = TRUE
+    CKPREDICTED  = FALSE
+    CKNADIR      = FALSE
+    SPKSMITHED   = FALSE
+    SPKRECON     = TRUE
+    SPKPREDICTED = FALSE
+    SHAPE        = SYSTEM
+    STARTPAD     = 0.0
+    ENDPAD       = 0.0
+    URL          = http://services.isis.astrogeology.usgs.gov/cgi-bin/spicein-
+                   it.cgi
+    PORT         = 80
+  End_Group
+
+  Group = Kernels
+    NaifFrameCode             = -53031
+    LeapSecond                = $base/kernels/lsk/naif0011.tls
+    TargetAttitudeShape       = $base/kernels/pck/pck00009.tpc
+    TargetPosition            = $base/kernels/spk/de405.bsp
+    InstrumentPointing        = ($odyssey/kernels/ck/m01_sc_map1_v2.bc,
+                                 $odyssey/kernels/fk/m01_v29.tf)
+    Instrument                = Null
+    SpacecraftClock           = $odyssey/kernels/sclk/ORB1_SCLKSCET.00210.tsc
+    InstrumentPosition        = $odyssey/kernels/spk/m01_map1_v2.bsp
+    InstrumentAddendum        = $odyssey/kernels/iak/themisAddendum003.ti
+    ShapeModel                = $base/dems/molaMarsPlanetaryRadius0005.cub
+    InstrumentPositionQuality = Reconstructed
+    InstrumentPointingQuality = Reconstructed
+    CameraVersion             = 2
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:02.0
+    CpuTime     = 00:00:00.6
+  End_Group
+End_Object
+
+
+Object = cam2map
+  IsisVersion       = "3.4.8.6010 stable | 2014-11-26"
+  ProgramVersion    = 2013-07-11
+  ProgramPath       = /usgs/pkgs/isis3.4.8/isis/bin
+  ExecutionDateTime = 2015-03-26T13:52:15
+  HostName          = Unknown
+  UserName          = jlaura
+  Description       = "Convert camera image to a map projection"
+
+  Group = UserParameters
+    FROM          = /scratch/jlaura/tmp6KDXHD/I00818003RDR_dvprocessed.cub
+    MAP           = $base/templates/maps/simplecylindrical.map
+    TO            = /scratch/jlaura/tmp6KDXHD/I00818003RDR_dvprocessed_proj.c-
+                    ub
+    MATCHMAP      = false
+    PIXRES        = CAMERA
+    DEFAULTRANGE  = MINIMIZE
+    LONSEAM       = AUTO
+    INTERP        = CUBICCONVOLUTION
+    WARPALGORITHM = AUTOMATIC
+  End_Group
+
+  Group = Mapping
+    TargetName         = MARS
+    ProjectionName     = SimpleCylindrical
+    EquatorialRadius   = 3396190.0 <meters>
+    PolarRadius        = 3376200.0 <meters>
+    LatitudeType       = Planetocentric
+    LongitudeDirection = PositiveEast
+    LongitudeDomain    = 180
+    PixelResolution    = 99.090078367505 <meters/pixel>
+    Scale              = 598.19003577198 <pixels/degree>
+    UpperLeftCornerX   = -65003.091409083 <meters>
+    UpperLeftCornerY   = 419051.94141618 <meters>
+    MinimumLatitude    = -5.0281906135262
+    MaximumLatitude    = 7.0691561787406
+    MinimumLongitude   = -1.2218274916401
+    MaximumLongitude   = 0.97090937151215
+    CenterLongitude    = -0.12545906006398
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:50.0
+    CpuTime     = 00:01:05.4
+  End_Group
+End_Object
+
+

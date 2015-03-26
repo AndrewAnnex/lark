@@ -1,0 +1,62 @@
+###################################################
+# User:   jlaura    Date:  Thu Mar 26 13:20:47 2015
+# Host: <UNKNOWN>   Cwd: /home/jlaura/krc_application/davinci
+###################################################
+themis_to_isis()
+QUIT
+quit
+###################################################
+# User:   jlaura    Date:  Thu Mar 26 13:21:57 2015
+# Host: <UNKNOWN>   Cwd: /home/jlaura/krc_application/davinci
+###################################################
+edit(themis_to_isis3)
+rad=load_pds($1)
+insmod("isis34")
+rad=load_pds($1)
+quit
+###################################################
+# User:   jlaura    Date:  Thu Mar 26 13:28:40 2015
+# Host: <UNKNOWN>   Cwd: /home/jlaura/krc_application/davinci
+###################################################
+rad=load_pds(radimage)
+rad=load_pds($1)
+ data=ascii(themis3db("select file_id, local_solar_time, solar_longitude from \
+qubgeom where point_id = \"CT\" and file_id rlike \"I\" and local_solar_time > \
+12 and local_solar_time < 19 and lat> -60 and lat < 60;"),format=float)
+ data=ascii(themis3db("select file_id, local_solar_time, solar_longitude from qubgeom where point_id = \"CT\" and file_id rlike \"I\" and local_solar_time >12 and local_solar_time < 19 and lat> -60 and lat < 60;"),format=float)
+themis3db("select file_id, local_solar_time, solar_longitude from qubgeom where point_id = \"CT\" and file_id rlike \"I\" and local_solar_time >12 and local_solar_time < 19 and lat> -60 and lat < 60;")
+themis3db("select file_id, local_solar_time, solar_longitude from qubgeom where point_id = \"CT\" and file_id='I01001001';")
+a=read_lines(themis3db("select file_id, local_solar_time, solar_longitude from qubgeom where point_id = \"CT\" and file_id='I01001001';"))
+###################################################
+# User:   jlaura    Date:  Thu Mar 26 13:32:51 2015
+# Host: <UNKNOWN>   Cwd: /home/jlaura/krc_application/davinci
+###################################################
+a=read_lines(themis3db("select file_id, local_solar_time, solar_longitude from qubgeom where point_id = \"CT\" and file_id='I01001001';"))
+###################################################
+# User:   jlaura    Date:  Thu Mar 26 13:32:57 2015
+# Host: <UNKNOWN>   Cwd: /home/jlaura/krc_application/davinci
+###################################################
+themis3db("select file_id, local_solar_time, solar_longitude from qubgeom where point_id = \"CT\" and file_id='I01001001';")
+rad=load_pds($1)
+a.spectral_qube.data
+rad.spectral_qube.data
+min(rad.spectral_qube.data)
+rad=thm.unscale(load_pds($1))
+rad=thm.unscale(load_pds($1),struct=1)
+thm.unscale()
+rad=load_pds($1)
+band_bin=rad.spectral_qube.band_bin.band_bin_band_number
+rad=thm.unscale(rad)
+min(rad)
+max(rad)
+image = rad3tb(rad, band_bin)
+min(image)
+max(image)
+image[where image<=0]=0
+min(image)
+cub = themis_to_isis3(radimage)
+radiamge
+radimage=$1
+cub = themis_to_isis3(radimage)
+cub.IsisCube.Core
+cub.cube=image
