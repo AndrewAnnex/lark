@@ -12,11 +12,11 @@ import tempfile
 
 import numpy as np
 
-from date import astrodate, julian2ls
-from io import fileio, readgeodata
-import isiswrappers
-import pipelinewrapper
-import pvlparser
+from app.date import astrodate, julian2ls
+from app.io import fileio, readgeodata
+from app.wrappers import isiswrappers
+from app.wrappers import pipelinewrapper
+from app.pvl import pvlparser
 
 #Constants
 DATEFMT = '%Y-%m-%dT%H:%M:%S.%f' #Date format from PVL matched to a Themis Cube
@@ -256,7 +256,11 @@ def processimages(jobs):
         tempshape = temperature.array.shape
         logger.info('Themis temperature data has {} lines and {} samples'.format(tempshape[0], tempshape[1]))
         srs = temperature.srs.ExportToWkt()
-        logger.info('The input temperature image projection is: {}'.format(srs))
+	gt = temperature.geotransform
+	print gt
+	print srs
+	sys.exit()
+	logger.info('The input temperature image projection is: {}'.format(srs))
 
         #Compute the extent and the resolution
         extent = subprocess.check_output(['/bin/bash', '-i', '-c', 'gdal_extent {}'.format(isiscube)])
@@ -308,8 +312,14 @@ def processimages(jobs):
         logger.debug('Input TI image time range is {} / {} to {} / {} (LsubS)'.format(startlsubs[0],startmartianyear[0],
                                                 stoplsubs[0], stopmartianyear[0]))
 
-
-        #Interpolation code is inserted here...
+	#Pack the initial parameters for shipping to the interpolator
+        parameters = {'starttime':starttime,
+		      'stoptime':stoptime,
+		      'startlatitude':minlat,
+		      'stoplatitude':maxlat,
+		      'geotransform':gt,
+		      'spatialreference':srs,}
+	#Interpolation code is inserted here...
 
         logger.info("PROCESSING COMPLETE\n")
 
@@ -317,5 +327,8 @@ def processimages(jobs):
 
 if __name__ == "__main__":
     logger = createlogger()
+    if len(sys.argv) < 2:
+	logger.error("Please supply an input configuration file.")
+	sys.exit()
     jobs = fileio.readinputfile(sys.argv[1])
     processimages(jobs)

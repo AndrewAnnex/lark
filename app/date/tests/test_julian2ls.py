@@ -1,7 +1,7 @@
 import numpy as np
 import unittest
 
-from date import julian2ls
+from .. import julian2ls
 
 
 class TestSmallJulian(unittest.TestCase):
@@ -23,7 +23,6 @@ class TestLargeJulian(unittest.TestCase):
                              103.53916196653154, 165.34239548092592])
         expectedmyn = np.array([-1943, -1710, -603, -653])
         result, myn = julian2ls.julian2ls(largedates)
-        print expected - result
         np.testing.assert_allclose(expected, result, rtol=1e-4)
         np.testing.assert_allclose(expectedmyn, myn)
 

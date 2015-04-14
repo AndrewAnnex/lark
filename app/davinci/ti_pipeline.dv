@@ -10,16 +10,16 @@ f_force = atoi($5)
 radimage = $6
 outputname = $7
 
-verbose = 1
+#verbose = 0
 
-printf('UDDW ' + uddw_arg + '\n')
-printf('TES ' + tesatm_arg + '\n')
-printf('DEP ' + deplaid_arg + '\n')
-printf('Til ' + rtilt_arg + '\n')
-printf('FRC ' + force_arg + '\n')
-printf('IN ' + radimage + '\n')
-printf('OUT ' + outputname + '\n')
-printf('DONE\n')
+#printf('UDDW ' + uddw_arg + '\n')
+#printf('TES ' + tesatm_arg + '\n')
+#printf('DEP ' + deplaid_arg + '\n')
+#printf('Til ' + rtilt_arg + '\n')
+#printf('FRC ' + force_arg + '\n')
+#printf('IN ' + radimage + '\n')
+#printf('OUT ' + outputname + '\n')
+#printf('DONE\n')
 
 rad = load_pds(radimage)
 band_bin=rad.spectral_qube.band_bin.band_bin_band_number
