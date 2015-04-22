@@ -26,6 +26,9 @@ GDAL2NP_CONVERSION[1] = 'int8'
 class GeoDataSet():
 
     def __init__(self, filename):
+	self.coordinate_transform = None
+	self.inverse_coordinate_transform = None
+
         self.filename = filename
         self.opendata()
 
@@ -37,6 +40,7 @@ class GeoDataSet():
         self.getrotation()
         self.getprojection()
         self.getndv()
+	self.getstatistics()
 
     def getdtype(self):
         """
@@ -106,6 +110,14 @@ class GeoDataSet():
         self.geotransform = self.ds.GetGeoTransform()
         success, self.invgeotransform = gdal.InvGeoTransform(self.geotransform)
 
+    def getstatistics(self, band=1):
+	"""
+	Get the minimum and maximum from band 1
+ 	"""
+	bnd = self.ds.GetRasterBand(band)
+	self.minimum = bnd.GetMinimum()
+	self.maximum = bnd.GetMaximum()
+
     def latlon_to_pixel(self, *args):
         """
         Convert a geospatial coordinate to a pixel coordinate
@@ -115,14 +127,15 @@ class GeoDataSet():
 
         *args   list of tuples of x,y coordinates in the form (lat, long)
         """
-        gt = self.geotransform
-        srs_latlon = self.srs.CloneGeogCS()
-        coordinate_transform = osr.CoordinateTransformation(srs_latlon, srs)
+	gt = self.geotransform
+	if self.coordinate_transform == None:
+	    srs_latlong = self.srs.CloneGeogCS()
+            self.coordinate_transform = osr.CoordinateTransformation(srs_latlon, self.srs)
         pixels = []
         for a in args:
             lat = a[0]
             lon = a[1]
-            px, py, pz = coordinate_transform.TransformPoint(lon, lat)
+            px, py, pz = self.coordinate_transform.TransformPoint(lon, lat)
 
             x = int((px - gt[0]) / gt[1])
             y = int((py - gt[3]) / gt[5])
@@ -131,9 +144,44 @@ class GeoDataSet():
 
         return pixels
 
+    def pixel_to_latlon(self, x, y):
+	"""
+	Convert from an x,y pixel pair into a lat/lon pair
+	using the source spatial reference system and geotransformation
+	parameters.
+
+	Parameters
+	----------
+	x : int
+	    The x pixel coordinate
+
+	y : int
+	    The y pixel coordinate
+
+	Returns
+	-------
+	lat, lon : tuple
+		   (lat, lon) coordinates for the piven pixel as measured
+		   from the upper left corner.
+	"""
+	gt = self.geotransform
+	if self.inverse_coordinate_transform == None:
+	    srs_latlong = self.srs.CloneGeogCS()
+	    self.inverse_coordinate_transform = osr.CoordinateTransformation(self.srs, srs_latlong)
+	ulon = x * gt[1] + gt[0]
+	ulat = y * gt[5] + gt[3]
+	(lon, lat, _ ) = self.inverse_coordinate_transform.TransformPoint(ulon, ulat)
+	return lat, lon
+
     def extractarray(self, pixels=None):
         """
         Extract the required data as a numpy array
+
+	Parameters
+	----------
+
+	pixels	: list
+		  [start, ystart, xstop, ystop]
         """
         band = self.ds.GetRasterBand(1)
 
@@ -145,9 +193,12 @@ class GeoDataSet():
             xextent = pixels[1][0] - xstart
             yextent = pixels[1][1] - ystart
             self.array = band.ReadAsArray(xstart, ystart, xextent, yextent).astype(self.dtype)
+	self.shape = self.array.shape
 
     def resamplearray(self, resolution):
         """
         Super or subsample the data to match the desired resolution.
         """
         raise NotImplementedError
+
+

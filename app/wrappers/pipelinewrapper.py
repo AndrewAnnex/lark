@@ -21,11 +21,13 @@ def themis_davinci(imagepath, uddw, tesatm, deplaid, rtilt, force, workingpath):
     outputimage     str PATH to the output image, in ISIS3 cube format
 
     """
-
+    basepath = os.path.dirname(__file__)
+    davincipath = '../davinvi'
+    spath = os.path.join(basepath, davincipath)
     basepath, fname = os.path.split(imagepath)
     outname, ext = os.path.splitext(fname)
     outpath = os.path.join(workingpath, outname) + '_dvprocessed.cub'
-    cmd = r'davinci/ti_pipeline.dv {} {} {} {} {} {} {}'.format(uddw, tesatm, deplaid, rtilt, force, imagepath, outpath)
+    cmd = r'/home/jlaura/krc_application/app/davinci/ti_pipeline.dv {} {} {} {} {} {} {}'.format(uddw, tesatm, deplaid, rtilt, force, imagepath, outpath)
     logger.debug(cmd)
     cmd = cmd.split()
     response = subprocess.check_output(cmd)

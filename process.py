@@ -45,7 +45,6 @@ def checkbandnumbers(bands, checkbands):
     for c in checkbands:
         if c not in bands:
             return False
-
     return True
 
 
@@ -257,9 +256,6 @@ def processimages(jobs):
         logger.info('Themis temperature data has {} lines and {} samples'.format(tempshape[0], tempshape[1]))
         srs = temperature.srs.ExportToWkt()
 	gt = temperature.geotransform
-	print gt
-	print srs
-	sys.exit()
 	logger.info('The input temperature image projection is: {}'.format(srs))
 
         #Compute the extent and the resolution
@@ -316,14 +312,11 @@ def processimages(jobs):
         parameters = {'starttime':starttime,
 		      'stoptime':stoptime,
 		      'startlatitude':minlat,
-		      'stoplatitude':maxlat,
-		      'geotransform':gt,
-		      'spatialreference':srs,}
+		      'stoplatitude':maxlat}
 	#Interpolation code is inserted here...
+	return temperature, parameters, ancillarydata, workingpath
 
-        logger.info("PROCESSING COMPLETE\n")
 
-        #os.removedirs(workingpath)
 
 if __name__ == "__main__":
     logger = createlogger()
@@ -331,4 +324,18 @@ if __name__ == "__main__":
 	logger.error("Please supply an input configuration file.")
 	sys.exit()
     jobs = fileio.readinputfile(sys.argv[1])
-    processimages(jobs)
+    temperature, parameters, ancillarydata, workingpath = processimages(jobs)
+    print temperature
+    print
+    print parameters
+    print
+    print ancillarydata
+    print
+    print workingpath
+    print
+    print dir(temperature)
+
+    print temperature.pixel_to_latlon(0,0)
+    print temperature.pixel_to_latlon(temperature.shape[1] - 1, temperature.shape[0] - 1)
+
+    shutil.rmtree(workingpath)
