@@ -12,11 +12,13 @@ import tempfile
 
 import numpy as np
 
-from app.date import astrodate, julian2ls
-from app.io import fileio, readgeodata
+import app.config as config
+from app.date import astrodate, julian2ls, julian2season
+from app.io import fileio, readgeodata, readhdf
 from app.wrappers import isiswrappers
 from app.wrappers import pipelinewrapper
 from app.pvl import pvlparser
+from app.interpolation import interpolator as interp
 
 #Constants
 DATEFMT = '%Y-%m-%dT%H:%M:%S.%f' #Date format from PVL matched to a Themis Cube
@@ -307,14 +309,15 @@ def processimages(jobs):
         stoplsubs, stopmartianyear = julian2ls.julian2ls(stoptime)
         logger.debug('Input TI image time range is {} / {} to {} / {} (LsubS)'.format(startlsubs[0],startmartianyear[0],
                                                 stoplsubs[0], stopmartianyear[0]))
-
+	print startlsubs, stoplsubs
 	#Pack the initial parameters for shipping to the interpolator
-        parameters = {'starttime':starttime,
-		      'stoptime':stoptime,
+        parameters = {'starttime':startlsubs,
+		      'stoptime':stoplsubs,
 		      'startlatitude':minlat,
 		      'stoplatitude':maxlat}
-	#Interpolation code is inserted here...
-	return temperature, parameters, ancillarydata, workingpath
+
+	#Interpolation code is inserted here.
+	yield temperature, parameters, ancillarydata, workingpath
 
 
 
@@ -324,18 +327,11 @@ if __name__ == "__main__":
 	logger.error("Please supply an input configuration file.")
 	sys.exit()
     jobs = fileio.readinputfile(sys.argv[1])
-    temperature, parameters, ancillarydata, workingpath = processimages(jobs)
-    print temperature
-    print
-    print parameters
-    print
-    print ancillarydata
-    print
-    print workingpath
-    print
-    print dir(temperature)
 
-    print temperature.pixel_to_latlon(0,0)
-    print temperature.pixel_to_latlon(temperature.shape[1] - 1, temperature.shape[0] - 1)
-
-    shutil.rmtree(workingpath)
+    #Process the input image(s)
+    for temperature, parameters, ancillarydata, workingpath in processimages(jobs):
+ 	startseason, stopseason = julian2season.j2season(parameters['starttime'])
+	interpolator = interp.Interpolator(temperature, ancillarydata,
+					   startseason, stopseason)
+	print dir(interpolator)
+	shutil.rmtree(workingpath)
