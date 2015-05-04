@@ -301,18 +301,20 @@ def processimages(jobs):
         starttime = time_to_pydate(header['IsisCube']['Instrument']['StartTime'])
         stoptime = time_to_pydate(header['IsisCube']['Instrument']['StopTime'])
         #Convert UTC to Julian
-        starttime = astrodate.utc2jd(starttime)
-        stoptime = astrodate.utc2jd(stoptime)
-        logger.debug('Input TI image time range is {} to {} (Julian)'.format(starttime, stoptime))
+        starttime_julian = astrodate.utc2jd(starttime)
+        stoptime_julian = astrodate.utc2jd(stoptime)
+        logger.debug('Input TI image time range is {} to {} (Julian)'.format(starttime_julian, stoptime_julian))
         #LsubS
-        startlsubs, startmartianyear = julian2ls.julian2ls(starttime)
-        stoplsubs, stopmartianyear = julian2ls.julian2ls(stoptime)
+        startlsubs, startmartianyear = julian2ls.julian2ls(starttime_julian)
+        stoplsubs, stopmartianyear = julian2ls.julian2ls(stoptime_julian)
+        startseason, stopseason = julian2season.j2season(startlsubs)
         logger.debug('Input TI image time range is {} / {} to {} / {} (LsubS)'.format(startlsubs[0],startmartianyear[0],
                                                 stoplsubs[0], stopmartianyear[0]))
-	print startlsubs, stoplsubs
 	#Pack the initial parameters for shipping to the interpolator
-        parameters = {'starttime':startlsubs,
-		      'stoptime':stoplsubs,
+        parameters = {'starttime':starttime,
+		      'stoptime':stoptime,
+                      'startseason': startseason,
+                      'stopseason':stopseason,
 		      'startlatitude':minlat,
 		      'stoplatitude':maxlat}
 
@@ -330,8 +332,7 @@ if __name__ == "__main__":
 
     #Process the input image(s)
     for temperature, parameters, ancillarydata, workingpath in processimages(jobs):
- 	startseason, stopseason = julian2season.j2season(parameters['starttime'])
-	interpolator = interp.Interpolator(temperature, ancillarydata,
-					   startseason, stopseason)
-	print dir(interpolator)
-	shutil.rmtree(workingpath)
+	interpolator = interp.Interpolator(temperature, ancillarydata, parameters)
+
+        #Cleanup
+        shutil.rmtree(workingpath)
