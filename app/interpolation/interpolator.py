@@ -8,7 +8,7 @@ from app import config
 
 logger = logging.getLogger('ThemisTI')
 
-class Interpolator(object):
+class EphemerisInterpolator(object):
 
     emissivities = {0.85: (0, 13500),
                     0.90: (13500, 27000),
@@ -41,6 +41,8 @@ class Interpolator(object):
 		      The first season to read from the hdf5 file
 	stopseason : int
 		     The final season to read from the hdf5
+        data : ndarray
+               The interpolated data using all ephemeris interpolation
 
 	"""
 
@@ -50,16 +52,25 @@ class Interpolator(object):
 	self.hdffile = readhdf.HDFDataSet()
 	self.lookuptable = self.hdffile.data
 
-        startseason = self.parameters['startseason']
-        stopseason = self.parameters['stopseason']
+        self.startseason = self.parameters['startseason']
+        self.stopseason = self.parameters['stopseason']
+        self.season = self.parameters['season']
 
-	self.startlookup = self.lookuptable['season_{}'.format(startseason)]
-	self.stoplookup = self.lookuptable['season_{}'.format(stopseason)]
+	self.startlookup = self.lookuptable['season_{}'.format(self.startseason)]
+	self.stoplookup = self.lookuptable['season_{}'.format(self.stopseason)]
 
 	self.get_emissivity_offsets()
         self.get_hour_offsets()
         self.get_lat_offsets()
 
+        self.extract_start_data()
+        self.extract_stop_data()
+        self.interpolateseasons()
+
+    def extract_start_data(self):
+        """
+        Extract the start seasons array
+        """
         #Double slicing is need because h5py does not support multiple fancy indices
         self.startdata = self.startlookup[:,
                                      self.latslice,
@@ -70,10 +81,22 @@ class Interpolator(object):
         nbytes = self.startdata.nbytes
         logger.debug('Seasonal arrays have shape {} and require {} bytes each'.format(shape, nbytes))
 
+    def extract_stop_data(self):
+        """
+        Extract the stop seasons array
+        """
         self.stopdata = self.stoplookup[:,
                                     self.latslice,
                                     self.startemiss[0]:self.startemiss[1]]
         self.stopdata = self.stopdata[self.hourslice, :, :]
+
+    def interpolateseasons(self):
+        """
+        Linear interpolation to get the seasonal arrays setup
+        """
+        remainder = self.season - self.startseason
+        f1 = 1.0 - remainder
+        self.data = (self.startdata * f1) + (self.stopdata * remainder)
 
     def get_nearest(self, input_value, lookup_table):
         """

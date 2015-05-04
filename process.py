@@ -307,14 +307,16 @@ def processimages(jobs):
         #LsubS
         startlsubs, startmartianyear = julian2ls.julian2ls(starttime_julian)
         stoplsubs, stopmartianyear = julian2ls.julian2ls(stoptime_julian)
-        startseason, stopseason = julian2season.j2season(startlsubs)
+        season, startseason, stopseason = julian2season.j2season(startlsubs)
         logger.debug('Input TI image time range is {} / {} to {} / {} (LsubS)'.format(startlsubs[0],startmartianyear[0],
                                                 stoplsubs[0], stopmartianyear[0]))
+        season = season[0]
 	#Pack the initial parameters for shipping to the interpolator
         parameters = {'starttime':starttime,
 		      'stoptime':stoptime,
                       'startseason': startseason,
                       'stopseason':stopseason,
+                      'season':season,
 		      'startlatitude':minlat,
 		      'stoplatitude':maxlat}
 
@@ -332,7 +334,7 @@ if __name__ == "__main__":
 
     #Process the input image(s)
     for temperature, parameters, ancillarydata, workingpath in processimages(jobs):
-	interpolator = interp.Interpolator(temperature, ancillarydata, parameters)
+	ephemerisdata = interp.EphemerisInterpolator(temperature, ancillarydata, parameters)
 
         #Cleanup
         shutil.rmtree(workingpath)

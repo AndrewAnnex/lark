@@ -24,5 +24,5 @@ def j2season(_date):
     recordoffset = dateoffset / config.MARTIAN_DAY
     startseason = int(recordoffset)
     stopseason = startseason + 1
-    return startseason, stopseason
+    return recordoffset, startseason, stopseason
 
