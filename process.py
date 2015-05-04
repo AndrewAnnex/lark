@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 
 import numpy as np
 
@@ -32,7 +33,7 @@ def checkbandnumbers(bands, checkbands):
     tuple contains those bands.
 
     In case of THEMIS, we check for band 9 as band 9 is the temperature
-    band required to derive thermal inertia.  We also check for band 10
+    band required to derive thermal temperature.  We also check for band 10
     which is required for TES atmosphere calculations.
 
     Parameters
@@ -160,7 +161,7 @@ def processimages(jobs):
                     processing parameters
 
     """
-
+    t1 = time.time()
     #Check the ISIS version
     isiswrappers.checkisisversion()
 
@@ -292,6 +293,10 @@ def processimages(jobs):
                     #Read the resampled tif and extract the array
                     ancillarydata[k] = readgeodata.GeoDataSet(tif)
                     ancillarydata[k].extractarray()
+
+                    #m to km
+                    if k == 'elevation':
+                        ancillarydata[k].array /= 1000.0
                     logger.debug('Dataset {} extract with shape {}'.format(v, ancillarydata[k].array.shape))
         bands = header['IsisCube']['BandBin']['BandNumber']
         logger.debug('Input TI image has bands {}'.format(bands))
@@ -319,8 +324,8 @@ def processimages(jobs):
                       'season':season,
 		      'startlatitude':minlat,
 		      'stoplatitude':maxlat}
-
-	#Interpolation code is inserted here.
+        t2 = time.time()
+        logger.info('Data pre=processing, clipping, and map projection took {} seconds.'.format(t2 - t1))
 	yield temperature, parameters, ancillarydata, workingpath
 
 
@@ -334,7 +339,16 @@ if __name__ == "__main__":
 
     #Process the input image(s)
     for temperature, parameters, ancillarydata, workingpath in processimages(jobs):
+        t1 = time.time()
 	ephemerisdata = interp.EphemerisInterpolator(temperature, ancillarydata, parameters)
+        t2 = time.time()
+        logger.info('Extracting lookup table and linear season interpolation took {} seconds'.format(t2 - t1))
 
+        #Brute force interpolation for each pixel
+        t1 = time.time()
+        interpolation_result = interp.ParallelParameterInterpolator(temperature, ancillarydata)
+        interpolation_result.bruteforce()
+        t2 = time.time()
+        logger.info('Brute force interpolation required {} seconds'.format(t2 - t1))
         #Cleanup
         shutil.rmtree(workingpath)

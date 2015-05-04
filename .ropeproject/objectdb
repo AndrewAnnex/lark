@@ -1,10 +1,9 @@
 Ä}q(U
-process.pyq}qUprocessimagesqcrope.base.oi.memorydb
+process.pyq}q(Ucreateloggerqcrope.base.oi.memorydb
 ScopeInfo
-q)Åq}qUunknownÖqÖq	Ubuiltinq
-UtupleqUinstanceqUdefinedqUapp/io/readgeodata.pyU
-GeoDataSetáÜáqs}qÜbsU$/usr/lib64/python2.6/json/scanner.pyq}qUScanner.iterscanqh)Åq}q(hhU$/usr/lib64/python2.6/json/scanner.pyUScanneráÜhUnoneÖqhtqh
-U	generator(h
-hhhtáqs}qÜbsU(/usr/lib64/python2.6/logging/__init__.pyq}qU	getLoggerqh)Åq}qUbuiltinUstrÜÖqUinstanceUdefinedU(/usr/lib64/python2.6/logging/__init__.pyU
-RootLoggeráÜqs}q ÜbsU5/usr/lib64/python2.6/site-packages/numpy/lib/utils.pyq!}q"U	deprecateq#h)Åq$}q%UdefinedU5/usr/lib64/python2.6/site-packages/numpy/lib/utils.pyUget_includeáUbuiltinUstrÜq&h&áq'UinstanceUdefinedU5/usr/lib64/python2.6/site-packages/numpy/lib/utils.pyU
-_DeprecateáÜq(s}q)ÜbsU$/usr/lib64/python2.6/json/decoder.pyq*}q+UJSONDecoder.raw_decodeq,h)Åq-}q.hhU$/usr/lib64/python2.6/json/decoder.pyUJSONDecoderáÜhháq/(UbuiltinUtupleUunknownÖq0h0tq1s}q2Übsu.
+q)Åq}q)UinstanceUdefinedU(/usr/lib64/python2.6/logging/__init__.pyU
+RootLoggeráÜqs}q	ÜbUprocessimagesq
+h)Åq}qUunknownÖqÖqUbuiltinqUtupleqUinstanceqUdefinedqUapp/io/readgeodata.pyU
+GeoDataSetáÜáqs}qÜbuU$/usr/lib64/python2.6/json/scanner.pyq}qUScanner.iterscanqh)Åq}q(hhU$/usr/lib64/python2.6/json/scanner.pyUScanneráÜhUnoneÖqhtqhU	generator(hhhhtáqs}qÜbsU(/usr/lib64/python2.6/logging/__init__.pyq}qU	getLoggerq h)Åq!}q"UbuiltinUstrÜÖq#UinstanceUdefinedU(/usr/lib64/python2.6/logging/__init__.pyU
+RootLoggeráÜq$s}q%ÜbsU5/usr/lib64/python2.6/site-packages/numpy/lib/utils.pyq&}q'U	deprecateq(h)Åq)}q*UdefinedU5/usr/lib64/python2.6/site-packages/numpy/lib/utils.pyUget_includeáUbuiltinUstrÜq+h+áq,Uinstanceq-Udefinedq.U5/usr/lib64/python2.6/site-packages/numpy/lib/utils.pyU
+_Deprecateq/áÜq0s}q1ÜbsU$/usr/lib64/python2.6/json/decoder.pyq2}q3UJSONDecoder.raw_decodeq4h)Åq5}q6hhU$/usr/lib64/python2.6/json/decoder.pyUJSONDecoderáÜhháq7(UbuiltinUtupleUunknownÖq8h8tq9s}q:Übsu.

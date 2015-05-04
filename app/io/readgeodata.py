@@ -1,5 +1,6 @@
 #!/home/jlaura/anaconda/bin/python
 
+import numpy as np
 from osgeo import gdal
 from osgeo import osr
 
@@ -41,6 +42,7 @@ class GeoDataSet():
         self.getprojection()
         self.getndv()
 	self.getstatistics()
+        print self.filename, self.minimum, self.maximum
 
     def getdtype(self):
         """
@@ -115,6 +117,7 @@ class GeoDataSet():
 	Get the minimum and maximum from band 1
  	"""
 	bnd = self.ds.GetRasterBand(band)
+        print bnd
 	self.minimum = bnd.GetMinimum()
 	self.maximum = bnd.GetMaximum()
 
@@ -186,13 +189,13 @@ class GeoDataSet():
         band = self.ds.GetRasterBand(1)
 
         if pixels == None:
-            self.array = band.ReadAsArray().astype(self.dtype)
+            self.array = band.ReadAsArray().astype(np.float32)
         else:
             xstart = pixels[0][0]
             ystart = pixels[0][1]
             xextent = pixels[1][0] - xstart
             yextent = pixels[1][1] - ystart
-            self.array = band.ReadAsArray(xstart, ystart, xextent, yextent).astype(self.dtype)
+            self.array = band.ReadAsArray(xstart, ystart, xextent, yextent).astype(np.float32)
 	self.shape = self.array.shape
 
     def resamplearray(self, resolution):

@@ -1,5 +1,6 @@
 from datetime import timedelta
 import logging
+import multiprocessing as mp
 
 import numpy as np
 
@@ -23,6 +24,8 @@ class EphemerisInterpolator(object):
     time_lookup = {0:0, 3:1, 6:2, 7:3, 8:4, 9:5, 10:6,
                 12:7, 14:8, 16:9, 24:10, 28:11, 32:12,
                 35:13, 36:14, 40:15, 44:16, 47:17}
+
+    inverse_time_lookup = {v:k for k, v in time_lookup.iteritems()}
 
     latitude_lookup = dict(zip(range(-90, 95, 5), range(37)))
 
@@ -65,7 +68,9 @@ class EphemerisInterpolator(object):
 
         self.extract_start_data()
         self.extract_stop_data()
+
         self.interpolateseasons()
+        self.interpolatehour()
 
     def extract_start_data(self):
         """
@@ -89,6 +94,39 @@ class EphemerisInterpolator(object):
                                     self.latslice,
                                     self.startemiss[0]:self.startemiss[1]]
         self.stopdata = self.stopdata[self.hourslice, :, :]
+
+    def interpolatehour(self):
+        """
+        Apply a cubic interpolation in hour
+        """
+        hourkeys = self.hourslice[self.hoursort]
+        x = [self.inverse_time_lookup[k] for k in hourkeys]
+        print x
+        #Ensure x is monotonically increasing incase of a wrap over the time break
+        mask =  np.asarray(self.checkmonotonic(x))
+        offset =  max(self.time_lookup.keys()) + 1
+        x = np.asarray(x)
+        print x
+        x[~mask] += offset
+        print x
+
+    def checkmonotonic(self, iterable):
+        """
+        Check if a given iterable is monotonically increasing.
+
+        Parameters
+        ----------
+        iterable : iterable
+                   Any Python iterable object
+
+        Returns
+        -------
+        monotonic : list
+                    A boolean list of all True if monotonic, or including
+                    an inflection point
+        """
+        monotonic =  [True] + [x < y for x, y in zip(iterable, iterable[1:])]
+        return monotonic
 
     def interpolateseasons(self):
         """
@@ -137,6 +175,7 @@ class EphemerisInterpolator(object):
         timediff = stoptime - starttime
         if timediff > timedelta(minutes = config.TIME_THRESHOLD):
             logger.debug("Time delta is {}.  This is significantly larger than anticipated".format(timediff))
+            self.starttime = starttime
         else:
             logger.debug("Time delta is {}.  Using start time as the global time".format(timediff))
 
@@ -187,3 +226,32 @@ class EphemerisInterpolator(object):
 
         logger.debug('Start latitude node is {}.  Nearest lookup node is {}.'.format(startlat, start_idx))
         logger.debug('Stop latitude node is {}.  Nearest lookup node is {}.'.format(stoplat, stop_idx))
+
+
+class ParallelParameterInterpolator(object):
+
+    def __init__(self, temperature, ancillarydata):
+
+        self.temperature = temperature
+        self.td = temperature.array
+        self.ed = ancillarydata['elevation'].array
+        self.sd = ancillarydata['slope'].array
+        self.sz = ancillarydata['slopeazimuth'].array
+        self.ad = ancillarydata['albedo'].array
+        self.od = ancillarydata['dustopacity'].array
+
+        self.resultdata = np.empty((self.td.shape[0], self.td.shape[1]), dtype=np.float32)
+
+        self.bruteforce()
+
+    def bruteforce(self):
+        """
+        Apply a brute force approach to interpolating using a double for loop
+        """
+        for i in xrange(self.td.shape[0]):
+            for j in xrange(self.td.shape[1]):
+                if self.td[i,j] == self.temperature.ndv:
+                    #The pixel is no data in the input, propagate to the output
+                    self.result = self.temperature.ndv
+                else:
+                    continue

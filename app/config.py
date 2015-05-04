@@ -5,6 +5,10 @@ YEAR = 686.9799625
 NSEASONS = 80
 SEASON_LENGTH = YEAR / float (NSEASONS)
 MARTIAN_DAY = 8.5875
+
+#Pressure at elevation zero
+MEAN_PRESSURE = 689.700012
+
 #This is the start date for season 0
 RECORD_START_DATE = 144.61074994
 
