@@ -18,3 +18,9 @@ Under this threshold time is assumed to be constant across
 the entire image.
 """
 TIME_THRESHOLD = 10
+
+"""
+The parameters below control the interpolation methods used.
+Options are: linear, quadratic, cubic, monotonic cubic
+"""
+HOUR_INTERPOLATION = 'cubic'

@@ -3,6 +3,7 @@ import logging
 import multiprocessing as mp
 
 import numpy as np
+from scipy.interpolate import interp1d
 
 from app.io import readhdf, readgeodata
 from app import config
@@ -99,16 +100,23 @@ class EphemerisInterpolator(object):
         """
         Apply a cubic interpolation in hour
         """
+
+        #Get the x node values and check they are monotonically increasing
         hourkeys = self.hourslice[self.hoursort]
         x = [self.inverse_time_lookup[k] for k in hourkeys]
-        print x
-        #Ensure x is monotonically increasing incase of a wrap over the time break
         mask =  np.asarray(self.checkmonotonic(x))
         offset =  max(self.time_lookup.keys()) + 1
         x = np.asarray(x)
-        print x
         x[~mask] += offset
-        print x
+        x *= 0.5  #Convert from 48 time steps to 24 hours
+
+        f = interp1d(x, self.data.T,
+                     kind = config.HOUR_INTERPOLATION,
+                     copy=False)
+        starttime = self.parameters['starttime']
+        newy = starttime.hour + (starttime.minute / 60.0)
+        self.data = f(newy)
+        print self.data.shape
 
     def checkmonotonic(self, iterable):
         """
