@@ -1,9 +1,14 @@
 from datetime import timedelta
+import functools
 import logging
 import multiprocessing as mp
+import sys
+from tempfile import mkdtemp
+import time
 
 import numpy as np
 from scipy.interpolate import interp1d
+import joblib
 
 from app.io import readhdf, readgeodata
 from app import config
@@ -12,23 +17,23 @@ logger = logging.getLogger('ThemisTI')
 
 class EphemerisInterpolator(object):
 
-    emissivities = {0.85: (0, 13500),
-                    0.90: (13500, 27000),
-		    1.0: (27000, int(1e10))}
+    emissivities = {0.85: np.s_[:13500],
+                    0.90: np.s_[13500:27000],
+		    1.0: np.s_[27000:]}
 
-    elevations = {-5: (0, 2700),
-                  -2: (2700, 5400),
-                  -1: (5400, 8100),
-                  6: (8100, 10800),
-                  8: (13500, int(10e6))}
+    elevations = {-5: np.s_[: 2700],
+                  -2: np.s_[2700:5400],
+                  -1: np.s_[5400:8100],
+                  6: np.s_[8100:10800],
+                  8: np.s_[13500:]}
 
     time_lookup = {0:0, 3:1, 6:2, 7:3, 8:4, 9:5, 10:6,
-                12:7, 14:8, 16:9, 24:10, 28:11, 32:12,
-                35:13, 36:14, 40:15, 44:16, 47:17}
-
+                   12:7, 14:8, 16:9, 24:10, 28:11, 32:12,
+                   35:13, 36:14, 40:15, 44:16, 47:17}
     inverse_time_lookup = {v:k for k, v in time_lookup.iteritems()}
 
     latitude_lookup = dict(zip(range(-90, 95, 5), range(37)))
+    inverse_latitude_lookup = {v:k for k, v in latitude_lookup.iteritems()}
 
     def __init__(self, temperature, ancillarydata, parameters):
 
@@ -73,6 +78,8 @@ class EphemerisInterpolator(object):
         self.interpolateseasons()
         self.interpolatehour()
 
+        self.latitudenodes = [self.inverse_latitude_lookup[k] for k in self.latslice[self.latsort]]
+
     def extract_start_data(self):
         """
         Extract the start seasons array
@@ -80,7 +87,7 @@ class EphemerisInterpolator(object):
         #Double slicing is need because h5py does not support multiple fancy indices
         self.startdata = self.startlookup[:,
                                      self.latslice,
-                                     self.startemiss[0]:self.startemiss[1]]
+                                     self.startemiss]
 
         self.startdata = self.startdata[self.hourslice, :, :]
         shape = self.startdata.shape
@@ -93,7 +100,7 @@ class EphemerisInterpolator(object):
         """
         self.stopdata = self.stoplookup[:,
                                     self.latslice,
-                                    self.startemiss[0]:self.startemiss[1]]
+                                    self.startemiss]
         self.stopdata = self.stopdata[self.hourslice, :, :]
 
     def interpolatehour(self):
@@ -116,7 +123,6 @@ class EphemerisInterpolator(object):
         starttime = self.parameters['starttime']
         newy = starttime.hour + (starttime.minute / 60.0)
         self.data = f(newy)
-        print self.data.shape
 
     def checkmonotonic(self, iterable):
         """
@@ -140,6 +146,7 @@ class EphemerisInterpolator(object):
         """
         Linear interpolation to get the seasonal arrays setup
         """
+
         remainder = self.season - self.startseason
         f1 = 1.0 - remainder
         self.data = (self.startdata * f1) + (self.stopdata * remainder)
@@ -235,31 +242,139 @@ class EphemerisInterpolator(object):
         logger.debug('Start latitude node is {}.  Nearest lookup node is {}.'.format(startlat, start_idx))
         logger.debug('Stop latitude node is {}.  Nearest lookup node is {}.'.format(stoplat, stop_idx))
 
+# note that this decorator ignores **kwargs
+def memoize(obj):
+    cache = obj.cache = {}
 
-class ParallelParameterInterpolator(object):
+    @functools.wraps(obj)
+    def memoizer(*args, **kwargs):
+        if args not in cache:
+            cache[args] = obj(*args, **kwargs)
+        return cache[args]
+    return memoizer
 
-    def __init__(self, temperature, ancillarydata):
+class ParameterInterpolator(object):
+
+    slopeaz_lookup = {0:np.s_[:540],
+                      75:np.s_[540:1080],
+                      210:np.s_[1080:1620],
+                      285:np.s_[1620:2160],
+                      360:np.s_[2160:]}
+    #inverse_slopeaz_lookup = {v:k for k, v in slopeaz_lookup.iteritems()}
+
+    slope_lookup = {0:np.s_[:180],
+                    30:np.s_[180, 360],
+                    60:np.s_[360:]}
+
+
+    #inverse_slope_lookup = {v:k for k, v in slope_lookup.iteritems()}
+
+    def __init__(self, temperature, td, ed, sd, sz, od, ad,
+                 lookuptable, latitudenodes, startpixel):
 
         self.temperature = temperature
-        self.td = temperature.array
-        self.ed = ancillarydata['elevation'].array
-        self.sd = ancillarydata['slope'].array
-        self.sz = ancillarydata['slopeazimuth'].array
-        self.ad = ancillarydata['albedo'].array
-        self.od = ancillarydata['dustopacity'].array
+        self.lookup = lookuptable
+        self.td = td
+        self.ed = ed
+        self.sd = sd
+        self.sz = sz
+        self.ad = ad
+        self.od = od
+        self.latitudenodes = latitudenodes
+        self.start = startpixel
+        #memory = self.setupcache()
 
         self.resultdata = np.empty((self.td.shape[0], self.td.shape[1]), dtype=np.float32)
 
-        self.bruteforce()
+        self.computelatitudefunction()
 
     def bruteforce(self):
         """
         Apply a brute force approach to interpolating using a double for loop
         """
         for i in xrange(self.td.shape[0]):
+            #Get the latitude at the start of the row, this is used for the entire row
+
+            if i % config.LATITUDE_STEP == 0:
+                startlat = i + config.LATITUDE_STEP  #move to the center of the step
+                startlat += start  #Offset for parallel segmentation
+                latitude = self.getlatitude(startlat, self.temperature)
+                #Perform the cubic latitude interpolation
+                compressedlookup = self.interpolate_latitude(latitude)
+                self.elevation_interp_f = interp1d(np.array([-5, -2, -1, 6, 8]),
+                                              compressedlookup,
+                                              kind=config.ELEVATION_INTERPOLATION,
+                                              copy=False,
+                                              axis=0)
+                print i, self.td.shape[0]
             for j in xrange(self.td.shape[1]):
                 if self.td[i,j] == self.temperature.ndv:
                     #The pixel is no data in the input, propagate to the output
                     self.result = self.temperature.ndv
                 else:
-                    continue
+                    #Interpolate elevation
+                    elevation = self.ed[i,j]
+                    new_elevation = self.interpolate_elevation(elevation)
+
+                    #Interpolate Slope Azimuth
+                    slopeaz_f = self.compute_slope_azimuth_function(new_elevation)
+                    new_slopeaz = self.interpolate_slopeaz(slopeaz_f, self.sz[i,j])
+                    #Interpolate Slope Azimuth
+                    #Interpolate Slope
+                    #Interpolate Tau
+                    #Interpolate Albedo
+                    #Interpolate Inertia
+
+    @memoize
+    def interpolate_elevation(self, elevation):
+       return self.elevation_interp_f(elevation)
+
+    @memoize
+    def interpolate_slopeaz(self, slopeaz_f, slopeaz):
+        return slopeaz_f(slopeaz)
+
+    def compute_slope_azimuth_function(self, new_elevation):
+        x = self.slopeaz_lookup.keys()
+        return interp1d(x, new_elevation,
+                                    kind = config.SLOPEAZ_INTERPOLATION,
+                                    copy=True,
+                                    axis=0)
+
+    def computelatitudefunction(self):
+        """
+        Given the x, y values, generate the latitude interpolation function
+        """
+        x = self.latitudenodes
+        self.lat_f = interp1d(x, self.lookup,
+                              kind = config.LATITUDE_INTERPOLATION,
+                              copy = True)
+
+    def interpolate_latitude(self, latitude):
+        """
+        Given a lookup table, apple the necessary interpolation
+
+        Parameters
+        ----------
+        latitude : float
+                   The latitude at which interpolation is to occurs
+        """
+        #TODO: The reshape is hard coded, can I get this from the hdf5 file?
+        return self.lat_f(latitude).reshape(5, 5, 3, 3, 3, 20)
+
+    def getlatitude(self, y, geoobject):
+        """
+        Given a row number, compute the current latitude, assuming that
+        the column is equal to 0.
+
+        Parameters
+        -----------
+        y : int
+            row identifier
+
+        Returns
+        -------
+        latitude : float
+                   Latitude for the given pixel
+        """
+        latitude, longitude = geoobject.pixel_to_latlon(0, y)
+        return latitude

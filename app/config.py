@@ -24,3 +24,21 @@ The parameters below control the interpolation methods used.
 Options are: linear, quadratic, cubic, monotonic cubic
 """
 HOUR_INTERPOLATION = 'cubic'
+LATITUDE_INTERPOLATION = 'cubic' #Needs to be monotonic cubic
+ELEVATION_INTERPOLATION = 'cubic'
+SLOPEAZ_INTERPOLATION = 'cubic'
+SLOPE_INTERPOLATION = 'quadratic'
+OPACITY_INTERPOLATION = 'quadratic'
+ALBEDO_INTERPOLATION = 'quadratic'
+INERTIA_INERPOLATION = 'linear'
+"""
+The pixel step at which the reference latitude
+is recomputed.  This value must be an INTEGER
+as we are working in pixel space.
+"""
+LATITUDE_STEP = 10
+
+"""
+This section controls rounding precision.
+"""
+ELEVATION_ROUNDING = 3
