@@ -297,7 +297,7 @@ class ParameterInterpolator(object):
 
             if i % config.LATITUDE_STEP == 0:
                 startlat = i + config.LATITUDE_STEP  #move to the center of the step
-                startlat += start  #Offset for parallel segmentation
+                startlat += self.start  #Offset for parallel segmentation
                 latitude = self.getlatitude(startlat, self.temperature)
                 #Perform the cubic latitude interpolation
                 compressedlookup = self.interpolate_latitude(latitude)
@@ -306,7 +306,6 @@ class ParameterInterpolator(object):
                                               kind=config.ELEVATION_INTERPOLATION,
                                               copy=False,
                                               axis=0)
-                print i, self.td.shape[0]
             for j in xrange(self.td.shape[1]):
                 if self.td[i,j] == self.temperature.ndv:
                     #The pixel is no data in the input, propagate to the output
@@ -317,8 +316,9 @@ class ParameterInterpolator(object):
                     new_elevation = self.interpolate_elevation(elevation)
 
                     #Interpolate Slope Azimuth
-                    slopeaz_f = self.compute_slope_azimuth_function(new_elevation)
-                    new_slopeaz = self.interpolate_slopeaz(slopeaz_f, self.sz[i,j])
+                    #slopeaz_f = self.compute_slope_azimuth_function(new_elevation)
+                    #new_slopeaz = self.interpolate_slopeaz(slopeaz_f, self.sz[i,j])
+                    #print new_slopeaz.shape
                     #Interpolate Slope Azimuth
                     #Interpolate Slope
                     #Interpolate Tau

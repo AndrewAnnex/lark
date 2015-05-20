@@ -287,7 +287,6 @@ def processimages(jobs, i):
                 logger.debug('{} set to a constant value, {}'.format(k, v))
                 del arr
             elif v != 'None':
-                print "PREWARP"
                 basename = os.path.basename(v)
                 root, extension = os.path.splitext(basename)
                 #Clip and resample the image to the correct resolution
@@ -337,7 +336,7 @@ def processimages(jobs, i):
     logger.info('Data pre=processing, clipping, and map projection took {} seconds.'.format(t2 - t1))
     return temperature, parameters, ancillarydata, workingpath
 
-
+'''
 #########################################################
 #Single file for now to test memorycaching
 
@@ -443,7 +442,6 @@ def interpolation(localdata, lat_f, ndv):
                                             kind=config.ELEVATION_INTERPOLATION,
                                             copy=False,
                                             axis=0)
-            print i, shape[0], time.time() - t1
         for j in xrange(shape[1]):
             if localdata[0][i,j] == ndv:
                #The pixel is no data in the input, propagate to the output
@@ -490,13 +488,10 @@ def prepdatacube(temperature, ancillarydata):
     inputdata[:,:,5] = od
 
     return inputdata
-
+'''
 if __name__ == "__main__":
     comm = MPI.COMM_WORLD
     rank = comm.rank
-    status = MPI.Status()
-
-    tags = enum('READY', 'DONE', 'EXIT', 'START')
 
     if rank == 0:
         logger = createlogger()
@@ -599,11 +594,16 @@ if __name__ == "__main__":
         startpixel = rank * quotient
         if rank == 0:
             startpixel += remainder
-
+            ta = time.time()
         param_interp = interp.ParameterInterpolator(temperature, td, ed, sd,
                                                     sz, od, ad, lookup,
                                                     latitude_nodes, startpixel)
-        print param_interp
+        #Begin the interpolation
+
+        param_interp.bruteforce()
+        if rank == 0:
+            tb = time.time()
+            logger.debug("Parameter interpolation took {} seconds".format(tb-ta))
         if rank == 0:
             #Cleanup
             shutil.rmtree(workingpath)

@@ -42,7 +42,6 @@ class GeoDataSet():
         self.getprojection()
         self.getndv()
 	self.getstatistics()
-        print self.filename, self.minimum, self.maximum
 
     def getdtype(self):
         """
@@ -117,7 +116,6 @@ class GeoDataSet():
 	Get the minimum and maximum from band 1
  	"""
 	bnd = self.ds.GetRasterBand(band)
-        print bnd
 	self.minimum = bnd.GetMinimum()
 	self.maximum = bnd.GetMaximum()
 

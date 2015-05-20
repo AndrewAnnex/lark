@@ -1,6 +1,5 @@
 {
-    "images":["/pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i008xxrdr/I00818003RDR.QUB",
-                "/pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i008xxrdr/ISHOULDFAIL.QUB"],
+    "images":["/pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i008xxrdr/I00818003RDR.QUB"],
     "latlon":[],
     "uddw": false,
     "tesatm":false,

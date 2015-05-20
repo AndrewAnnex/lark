@@ -1,4 +1,4 @@
-#!/usgs/apps/anaconda/bin/python python
+#!/home/jlaura/anaconda/bin/python python
 import json
 
 import argparse
@@ -6,8 +6,6 @@ import logging
 import os
 from popen2 import popen2
 import sys
-
-pypath = '/usgs/apps/anaconda/bin/python'
 
 def parsearguments():
     """
@@ -111,8 +109,8 @@ def submitjobs(inputfile, walltime, nnodes, ncores, subcmd='qsub'):
     """
     #Open pipe to the commandline
     outputcl, inputcl = popen2(subcmd)
-    pythonpath = '/home/jlaura/anaconda/bin/python'
-    command = '/home/jlaura/anaconda/bin/mpirun -n {} {} process.py {} '.format(nnodes * ncores,
+    pythonpath = '/usgs/apps/anaconda/bin/python'
+    command = '/usgs/apps/anaconda/bin/mpirun -n {} {} process.py {} '.format(nnodes * ncores,
                                                                 pythonpath,
                                                                 inputfile)
 
