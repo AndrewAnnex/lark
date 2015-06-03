@@ -1,6 +1,7 @@
 from datetime import timedelta
 import functools
 import logging
+import math
 import multiprocessing as mp
 import sys
 from tempfile import mkdtemp
@@ -260,14 +261,26 @@ class ParameterInterpolator(object):
                       210:np.s_[1080:1620],
                       285:np.s_[1620:2160],
                       360:np.s_[2160:]}
-    #inverse_slopeaz_lookup = {v:k for k, v in slopeaz_lookup.iteritems()}
 
     slope_lookup = {0:np.s_[:180],
                     30:np.s_[180, 360],
                     60:np.s_[360:]}
 
 
-    #inverse_slope_lookup = {v:k for k, v in slope_lookup.iteritems()}
+    tau_lookup = {0.02:np.s_[:60],
+                  0.30:np.s_[6:120],
+                  0.62:np.s_[120:]}
+
+    albedo_lookup = {0.08:np.s_[:20],
+                     0.22:np.s_[20:40],
+                     0.32:np.s_[40:]}
+
+    inertia_values = np.array([24.0, 30.9, 39.9, 51.4, 66.3, 85.5,
+                               110.3, 142.2, 183.3, 236.3, 304.7,
+                               392.8, 506.5, 653.0, 842.0, 1085.6,
+                               1399.7, 1804.7, 2326.8, 3000.0])
+    inertia_values_log = np.log(inertia_values)
+    inertia_values_ratio = np.empty(len(inertia_values_log) - 1)
 
     def __init__(self, temperature, td, ed, sd, sz, od, ad,
                  lookuptable, latitudenodes, startpixel):
@@ -282,7 +295,6 @@ class ParameterInterpolator(object):
         self.od = od
         self.latitudenodes = latitudenodes
         self.start = startpixel
-        #memory = self.setupcache()
 
         self.resultdata = np.empty((self.td.shape[0], self.td.shape[1]), dtype=np.float32)
 
@@ -292,6 +304,8 @@ class ParameterInterpolator(object):
         """
         Apply a brute force approach to interpolating using a double for loop
         """
+        import time
+        t1 = time.time()
         for i in xrange(self.td.shape[0]):
             #Get the latitude at the start of the row, this is used for the entire row
 
@@ -301,11 +315,10 @@ class ParameterInterpolator(object):
                 latitude = self.getlatitude(startlat, self.temperature)
                 #Perform the cubic latitude interpolation
                 compressedlookup = self.interpolate_latitude(latitude)
-                self.elevation_interp_f = interp1d(np.array([-5, -2, -1, 6, 8]),
-                                              compressedlookup,
-                                              kind=config.ELEVATION_INTERPOLATION,
-                                              copy=False,
-                                              axis=0)
+                self.elevation_interp_f = self.compute_interpolation_function(np.array([-5.0, -2, -1, 6, 8]),
+                                            compressedlookup, config.ELEVATION_INTERPOLATION)
+            if i % 100 == 0:
+                print i, self.td.shape[0], time.time() - t1
             for j in xrange(self.td.shape[1]):
                 if self.td[i,j] == self.temperature.ndv:
                     #The pixel is no data in the input, propagate to the output
@@ -316,29 +329,120 @@ class ParameterInterpolator(object):
                     new_elevation = self.interpolate_elevation(elevation)
 
                     #Interpolate Slope Azimuth
+                    slopeaz_f = self.compute_interpolation_function(self.slopeaz_lookup.keys(),
+                                                                    new_elevation,
+                                                                    config.SLOPEAZ_INTERPOLATION)
                     #slopeaz_f = self.compute_slope_azimuth_function(new_elevation)
-                    #new_slopeaz = self.interpolate_slopeaz(slopeaz_f, self.sz[i,j])
-                    #print new_slopeaz.shape
-                    #Interpolate Slope Azimuth
+                    new_slopeaz = slopeaz_f(self.sz[i,j])
                     #Interpolate Slope
+                    slope_f = self.compute_interpolation_function(self.slope_lookup.keys(),
+                                                                  new_slopeaz,
+                                                                  config.SLOPE_INTERPOLATION)
+                    #slope_f = self.compute_slope_function(new_slopeaz)
+                    new_slope = slope_f(self.sd[i,j])
                     #Interpolate Tau
+                    tau_f = self.compute_interpolation_function(self.tau_lookup.keys(),
+                                                                new_slope,
+                                                                config.OPACITY_INTERPOLATION)
+                    #tau_f = self.compute_tau_function(new_slope)
+                    new_tau = tau_f(self.od[i,j])
                     #Interpolate Albedo
+                    albedo_f = self.compute_interpolation_function(self.albedo_lookup.keys(),
+                                                                   new_tau,
+                                                                   config.ALBEDO_INTERPOLATION)
+                    #albedo_f = self.compute_albedo_function(new_tau)
+                    new_albedo = albedo_f(self.ad[i,j])
                     #Interpolate Inertia
+                    self.resultdata[i,j], uncertainty = self.interpolate_ti(self.td[i,j], new_albedo)
+
+    def interpolate_ti(self, temperature, albedo_lookup):
+        """
+        Interpolate albedo to Thermal Inertia
+
+        Parameters
+        ----------
+        temperature : float
+                      temperature at a given pixel
+
+        albedo_lookup : ndarray
+                        vector lookup from the previous interpolations
+        """
+
+        maxi = albedo_lookup.argmax()
+        mini = albedo_lookup.argmin()
+        #Assuming that the model is monnotoic, handle slope of either direction
+        if mini < maxi:
+            maxi, mini = mini, maxi
+        tmax = albedo_lookup[maxi]
+        tmin = albedo_lookup[mini]
+        monotonic_temps = albedo_lookup[maxi:mini+1]
+
+        num_temps = len(monotonic_temps)
+        if np.all(np.diff(monotonic_temps) < 0):
+            upperidx = num_temps - np.searchsorted(monotonic_temps[::-1], temperature, side='left')
+        else:
+            upperidx = np.searchsorted(monotonic_temps, temperature, side='left')
+
+        if upperidx == num_temps:
+            #Should return a high temperature error, not 0.0
+            return self.inertia_values[-1], 0.0
+        elif upperidx == 0:
+            return self.inertia_values[0], 0.0
+        upperthreshold =  monotonic_temps[upperidx]
+        lowerthreshold = monotonic_temps[upperidx - 1]
+        fractional_index = upperidx + (temperature - lowerthreshold) / (upperthreshold-lowerthreshold)
+
+        a = max([0.001, abs(albedo_lookup[upperidx] - albedo_lookup[upperidx - 1])])
+        uncertainty = min([self.inertia_values_ratio[upperidx - 1]/a, 95.11]) #Hugh's magic uncertainty number
+
+        i = int(fractional_index)
+        log_inertia = self.inertia_values_log[maxi]
+
+        rterp = self.inertia_values_log[maxi + i - 1] +\
+                (fractional_index - float(i)) *\
+                (self.inertia_values_log[maxi+i] -\
+                 self.inertia_values_log[maxi + i - 1])
+
+        inertia =  math.exp(rterp)
+        return inertia, uncertainty
 
     @memoize
     def interpolate_elevation(self, elevation):
        return self.elevation_interp_f(elevation)
 
-    @memoize
-    def interpolate_slopeaz(self, slopeaz_f, slopeaz):
-        return slopeaz_f(slopeaz)
 
-    def compute_slope_azimuth_function(self, new_elevation):
-        x = self.slopeaz_lookup.keys()
-        return interp1d(x, new_elevation,
-                                    kind = config.SLOPEAZ_INTERPOLATION,
-                                    copy=True,
-                                    axis=0)
+    def compute_interpolation_function(self, x, inarray,
+                                       kind,
+                                       bounds_error=False):
+        """
+        Compute an interpolation function for axis=0 of a
+        multi-dimensional array.
+
+        Parameters
+        ----------
+        x : iterable
+            A list or ndarray of x dimension nodes
+
+        inarray : ndarray
+                  The input array with dimension 0 equal to
+                  len(x).
+
+        kind : {'linear', 'quadratic', 'cubic'}
+               The type of interpolation to be performed.
+
+        bounds_error : bool
+                       (Default False) Whether or not to alert if the
+                       input value falls beyond the interpolation range.
+
+        Returns
+        -------
+
+        interp1d : object
+                   A scipy interp1d object to perform interpolation.
+        """
+
+        return interp1d(x, inarray, kind=kind,copy=True, axis=0,
+                        bounds_error = bounds_error)
 
     def computelatitudefunction(self):
         """

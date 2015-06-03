@@ -1,16 +1,18 @@
 #This file contains constant configuration values that are not readable
 # from the KRC input files
 
+"""
+Time constants
+"""
 YEAR = 686.9799625
 NSEASONS = 80
 SEASON_LENGTH = YEAR / float (NSEASONS)
 MARTIAN_DAY = 8.5875
+RECORD_START_DATE = 144.61074994
 
 #Pressure at elevation zero
 MEAN_PRESSURE = 689.700012
 
-#This is the start date for season 0
-RECORD_START_DATE = 144.61074994
 
 """
 The number of minutes over which time is allowed to vary.
@@ -42,3 +44,5 @@ LATITUDE_STEP = 10
 This section controls rounding precision.
 """
 ELEVATION_ROUNDING = 3
+
+

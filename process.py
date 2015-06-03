@@ -336,159 +336,6 @@ def processimages(jobs, i):
     logger.info('Data pre=processing, clipping, and map projection took {} seconds.'.format(t2 - t1))
     return temperature, parameters, ancillarydata, workingpath
 
-'''
-#########################################################
-#Single file for now to test memorycaching
-
-slopeaz_lookup = {0:np.s_[:540],
-                75:np.s_[540:1080],
-                210:np.s_[1080:1620],
-                285:np.s_[1620:2160],
-                360:np.s_[2160:]}
-
-slope_lookup = {0:np.s_[:180],
-              30:np.s_[180, 360],
-              60:np.s_[360:]}
-
-def computelatitudefunction(latitudenodes, data):
-    """
-    Given the x, y values, generate the latitude interpolation function
-    """
-    x = latitudenodes
-    return interp1d(x, data,
-                    kind = config.LATITUDE_INTERPOLATION,
-                    copy = True)
-
-def interp_getlatitude(y, geoobject):
-    """
-    Given a row number, compute the current latitude, assuming that
-    the column is equal to 0
-
-    Parameters
-    -----------
-    y : int
-      row identifier
-
-    Returns
-    -------
-    latitude : float
-             Latitude for the given pixel
-    """
-    latitude, longitude = geoobject.pixel_to_latlon(0, y)
-    return latitude
-
-def memoize(obj):
-    cache = objcache = {}
-
-    @functools.wraps(obj)
-    def memoizer(*args, **kwargs):
-        if args not in cache:
-            cache[args] = obj(*args, **kwargs)
-        return cache[args]
-    return memoizer
-
-#Memoization will not help, stepping up the image in increments
-def interpolate_latitude(lat_f, latitude):
-    """
-    Given a lookup table, apple the necessary interpolation
-
-    Parameters
-    ----------
-    latitude : float
-               The latitude at which interpolation is to occurs
-    """
-    #TODO: The reshape is hard coded, can I get this from the hdf5 file?
-    return lat_f(latitude).reshape(5, 5, 3, 3, 3, 20)
-
-
-@memoize
-def interpolate_elevation(elevation_interp_f, elevation):
-    return elevation_interp_f(elevation)
-
-@memoize
-def interpolate_slopeaz(slopeaz_f, slopeaz):
-    return slopeaz_f(slopeaz).reshape(3, 3, 3, 20)
-
-def compute_slope_azimuth(new_elevation):
-            x = slopeaz_lookup.keys()
-            f = interp1d(x, new_elevation,
-                            kind=config.SLOPEAZ_INTERPOLATION,
-                            copy=True,
-                            axis=0)
-            return f
-
-def interpolation(localdata, lat_f, ndv):
-    """
-    Function applied to all sub-arrays of a global array
-    composed of all of the input datasets.  The final dimension,
-    [:,:,-1] contains the results.
-
-    Parameters
-    ----------
-    localdata : object
-                A distarray object
-    """
-    shape = localdata.local_shape
-    start, stop = localdata.global_limits(0)
-    #Brute force interpolation for each pixel
-    t1 = time.time()
-    for i in xrange(shape[0]):
-        if i % config.LATITUDE_STEP == 0:
-            latitude = interp_getlatitude(start + i + config.LATITUDE_STEP, temperature)
-            #Perform the cubic latitude interpolation
-            compressedlookup = interpolate_latitude(lat_f, latitude)
-            elevation_interp_f = interp1d(np.array([-5, -2, -1, 6, 8]),
-                                            compressedlookup,
-                                            kind=config.ELEVATION_INTERPOLATION,
-                                            copy=False,
-                                            axis=0)
-        for j in xrange(shape[1]):
-            if localdata[0][i,j] == ndv:
-               #The pixel is no data in the input, propagate to the output
-                localdata[-1][i,j] = ndv
-            else:
-                #Interpolate elevation
-                elevation = localdata[1][i, j]
-                new_elevation = interpolate_elevation(elevation_interp_f, elevation)
-                #Interpolate Slope Azimuth
-                #slopeaz_f = compute_slope_azimuth(new_elevation)
-                #new_slopeaz = interpolate_slopeaz(slopeaz_f, sz[i,j])
-                #Interpolate Slope
-                #Interpolate Tau
-                #Interpolate Albedo
-                #Interpolate Inertia
-
-    #print new_slopeaz.shape
-
-def prepdatacube(temperature, ancillarydata):
-    """
-    Pack the input data sets into a single data cube.
-    This is memory duplication, but makes distribution syntax
-    trivial.  Can be removed.
-
-    Parameters
-    ---------
-    temepratute : object
-                  A GeoObject
-
-    ancillarydata : dict
-                    A dictionary of GeoObjects containing
-                     ancillary datasets
-
-    Returns
-    -------
-    inputdata : ndarray
-                A 7 dimensional numpy array
-    """
-    inputdata[:,:,0] = td
-    inputdata[:,:,1] = ed
-    inputdata[:,:,2] = sd
-    inputdata[:,:,3] = sz
-    inputdata[:,:,4] = ad
-    inputdata[:,:,5] = od
-
-    return inputdata
-'''
 if __name__ == "__main__":
     comm = MPI.COMM_WORLD
     rank = comm.rank
@@ -599,12 +446,29 @@ if __name__ == "__main__":
                                                     sz, od, ad, lookup,
                                                     latitude_nodes, startpixel)
         #Begin the interpolation
-
         param_interp.bruteforce()
+
+        for r in range(comm.size):
+            if r == rank:
+                res = param_interp.resultdata
+                print r, np.mean(res[res != 0]), res.dtype
+
+        if rank == 0:
+            result = np.zeros(temperature.shape, dtype=np.float32)
+        else:
+            result = None
+        comm.Gatherv([param_interp.resultdata, MPI.FLOAT],
+                     [result, scattersize, scatteroffsets, MPI.FLOAT],
+                     root=0)
+
         if rank == 0:
             tb = time.time()
             logger.debug("Parameter interpolation took {} seconds".format(tb-ta))
-        if rank == 0:
+
+
+            print np.mean(result[result != 0])
+            #This is working, now write to a file
+
             #Cleanup
             shutil.rmtree(workingpath)
             #logger.info("Processing image {} required {} seconds".format())
