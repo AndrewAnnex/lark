@@ -5,6 +5,7 @@
 *.h5
 *.ipynb_checkpoints
 *.pyc
+*.log
 
 #Geospatial
 *.cub
