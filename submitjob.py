@@ -110,7 +110,7 @@ def submitjobs(inputfile, walltime, nnodes, ncores, subcmd='qsub'):
     #Open pipe to the commandline
     outputcl, inputcl = popen2(subcmd)
     pythonpath = '/usgs/apps/anaconda/bin/python'
-    command = '/usgs/apps/anaconda/bin/mpirun -n {} {} process.py {} '.format(nnodes * ncores,
+    command = '/usgs/apps/anaconda/bin/mpirun -n {} --hostfile only_eights.lis {} process.py {} '.format(nnodes * ncores,
                                                                 pythonpath,
                                                                 inputfile)
 

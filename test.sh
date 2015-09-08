@@ -1,2 +1,2 @@
 rm themisti.log
-python submitjob.py -n=1 -c=11 testfiles/sampleinput.json
+python submitjob.py -n=8 -c=8 test_images/I07197005.json

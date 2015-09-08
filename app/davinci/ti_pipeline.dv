@@ -1,4 +1,4 @@
-#!/usgs/apps/davinci/current/bin/davinci -f
+#!/usgs/apps/davinci/current/bin/davinci -f -v0
 #debug=1
 insmod("isis3")
 
@@ -26,74 +26,74 @@ band_bin=rad.spectral_qube.band_bin.band_bin_band_number
 rad=thm.unscale(rad)
 
 
-f_uddw = 0
-f_TESatm = 0
-f_ndeplaid = 0
-f_rtilt = 0
+#f_uddw = 0
+#f_tesatm = 0
+#f_ndeplaid = 0
+#f_rtilt = 0
 
-if (f_uddw==0 && f_TESatm==0 && f_ndeplaid==0 && f_rtilt==0) {
+if (f_uddw==0 && f_tesatm==0 && f_ndeplaid==0 && f_rtilt==0) {
     image = rad3tb(rad, band_bin)
 }
-if (f_uddw==1 && f_TESatm==0 && f_ndeplaid==0 && f_rtilt==0) {
+if (f_uddw==1 && f_tesatm==0 && f_ndeplaid==0 && f_rtilt==0) {
     a=uddw(radimage, geom=0, atm=0, force=0, http=0)
     rad=a
     image = rad3tb(rad, band_bin)
 }
 
-if (f_uddw==0 && f_TESatm==0 && f_ndeplaid==1 && f_rtilt==0) {
+if (f_uddw==0 && f_tesatm==0 && f_ndeplaid==1 && f_rtilt==0) {
     d=night_deplaid(rad)
     rad=d
     image = rad3tb(rad, band_bin)
 }
 
-if (f_uddw==0 && f_TESatm==0 && f_ndeplaid==0 && f_rtilt==1) {
+if (f_uddw==0 && f_tesatm==0 && f_ndeplaid==0 && f_rtilt==1) {
     r=rtilt(data=radimage, ignore=-32768)
     rad=r
     image = rad3tb(rad, band_bin)
 }
 
-if (f_uddw==1 && f_TESatm==1 && f_ndeplaid==0 && f_rtilt==0) {
+if (f_uddw==1 && f_tesatm==1 && f_ndeplaid==0 && f_rtilt==0) {
     a=uddw(radimage, geom=0, atm=1, force=1, http=0)
     rad=a
     image = rad3tb(rad, band_bin)
 }
 
-if (f_uddw==1 && f_TESatm==0 && f_ndeplaid==1 && f_rtilt==0) {
+if (f_uddw==1 && f_tesatm==0 && f_ndeplaid==1 && f_rtilt==0) {
     a=uddw(radimage, geom=0, atm=0, force=0, http=0)
     d=night_deplaid(a)
     rad=d
     image = rad3tb(rad, band_bin)
 }
 
-if (f_uddw==1 && f_TESatm==0 && f_ndeplaid==0 && f_rtilt==1) {
+if (f_uddw==1 && f_tesatm==0 && f_ndeplaid==0 && f_rtilt==1) {
     a=uddw(radimage, geom=0, atm=0, force=0, http=0)
     r=rtilt(data=a, ignore=-32768)
     rad=r
     image = rad3tb(rad, band_bin)
 }
 
-if (f_uddw==0 && f_TESatm==0 && f_ndeplaid==1 && f_rtilt==1) {
+if (f_uddw==0 && f_tesatm==0 && f_ndeplaid==1 && f_rtilt==1) {
     r=rtilt(data=radimage, ignore=-32768)
     d=night_deplaid(r)
     rad=d
     image = rad3tb(rad, band_bin)
 }
 
-if (f_uddw==1 && f_TESatm==1 && f_ndeplaid==1 && f_rtilt==0) {
+if (f_uddw==1 && f_tesatm==1 && f_ndeplaid==1 && f_rtilt==0) {
     a=uddw(radimage, geom=0, atm=1, force=1, http=0)
     d=night_deplaid(a)
     rad=d
     image = rad3tb(rad, band_bin)
 }
 
-if (f_uddw==1 && f_TESatm==1 && f_ndeplaid==0 && f_rtilt==1) {
+if (f_uddw==1 && f_tesatm==1 && f_ndeplaid==0 && f_rtilt==1) {
     a=uddw(radimage, geom=0, atm=1, force=1, http=0)
     r=rtilt(data=a, ignore=-32768)
     rad=r
     image = rad3tb(rad, band_bin)
 }
 
-if (f_uddw==1 && f_TESatm==0 && f_ndeplaid==1 && f_rtilt==1) {
+if (f_uddw==1 && f_tesatm==0 && f_ndeplaid==1 && f_rtilt==1) {
     a=uddw(radimage, geom=0, atm=0, force=0, http=0)
     r=rtilt(data=a, ignore=-32768)
     d=night_deplaid(r)
@@ -101,15 +101,13 @@ if (f_uddw==1 && f_TESatm==0 && f_ndeplaid==1 && f_rtilt==1) {
     image = rad3tb(rad, band_bin)
 }
 
-if (f_uddw==1 && f_TESatm==1 && f_ndeplaid==1 && f_rtilt==1) {
+if (f_uddw==1 && f_tesatm==1 && f_ndeplaid==1 && f_rtilt==1) {
     a=uddw(radimage, geom=0, atm=1, force=1, http=0)
     r=rtilt(data=a, ignore=-32768)
     d=night_deplaid(r)
     rad=d
     image = rad3tb(rad, band_bin)
 }
-#if (uddw_arg == 0 && tesatm_arg == 0 && deplaid_arg == 0 && rtilt_arg == 0){
-#    image = rad3tb(rad, rad.spectral_qube.band_bin_band_number)}
 
 #if (uddw_arg==1 && tesatm_arg==1 && deplaid_arg==1 && rtilt_arg==1) {
 #    data=uddw(inputimage, geom=0, atm=1, force=1, http=0)

@@ -34,6 +34,24 @@ class TestReverse(unittest.TestCase):
         date = julian2ls.julian2ls(178, marsyear=40, reverse=True)
         np.testing.assert_allclose(date, expected, rtol=1e-4)
 
+class TestLanders(unittest.TestCase):
+    """
+    Testing against: http://www-mars.lmd.jussieu.fr/mars/time/martian_time.html
+    """
+    def test_year_start(self):
+        result, myn = julian2ls.julian2ls(2435198.5)
+        self.assertEqual(myn, 0)
+        self.assertAlmostEqual(result, 354.8, 0)
+
+    def test_curiosity(self):
+        result, myn = julian2ls.julian2ls(2456145.7207986116)
+        self.assertAlmostEqual(result, 150.6, 0)
+
+    def test_pathfinder(self):
+        result, myn = julian2ls.julian2ls(2450634.2061921293)
+        self.assertEqual(myn, 23)
+        self.assertAlmostEqual(result, 142.7, 0)
+
 if __name__ == '__main__':
 
     unittest.main()

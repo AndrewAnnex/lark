@@ -1,0 +1,21 @@
+30 June 2015
+
+File naming convention:
+RDR - THEMIS radiance image, and is the input into the thermal inertia derivation algorithm.  These images can also be used to test the davinci pre-processing.
+
+*.cub - THEMIS thermal inertia images, derived using the 2006 ghetto method.  This is a sub-set of the data set used to generate the global thermal inertia mosaic and that the new thermal inertia images will be ocmpared to.
+
+
+Images:
+I06885006 - low albedo
+I09917006 - high albedo (variable thermal inertia)
+I00933002 - extreme elevation change (Valles Marineris)
+I07526017 - high elevation (Olympis Mons, likely crappy data as well)
+I07633027 - low thermal inertia (Arabia Terra, have fun)
+I18688007 - high thermal inertia (Isidis)
+I18801010 - variable thermal inertia
+I07197005 - short image (3600 lines, other images in this set are also short)
+I02303002 - long image (10768 lines, other images in this set are also long)
+I0573100  - low latitude (-40-ish)
+I01114002 - random
+I06655010 - random

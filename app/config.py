@@ -10,9 +10,20 @@ SEASON_LENGTH = YEAR / float (NSEASONS)
 MARTIAN_DAY = 8.5875
 RECORD_START_DATE = 144.61074994
 
+"""
+Time formatting in the label
+"""
+DATEFMT = '%Y-%m-%dT%H:%M:%S.%f' #Date format from PVL matched to a Themis Cube
+
+
 #Pressure at elevation zero
 MEAN_PRESSURE = 689.700012
 
+"""
+Logging
+"""
+LOG_LEVEL = "DEBUG" #ERROR, DEBUG, INFO
+LOG_NAME = ""
 
 """
 The number of minutes over which time is allowed to vary.

@@ -1,0 +1,24 @@
+{"latlon": [], 
+    "outputformat": ["GTiff"],
+    "force": true,
+    "name": "THEMIS",
+    "tesatm": true,
+    "bands": [9, 10],
+    "uddw": true,
+    "rtilt": false, 
+    "deplaid":false,
+    "processing_pipeline": "themis_davinci",
+    "images": ["/pds_san/PDS_Archive/Mars_Odyssey/THEMIS/data/odtir0_xxxx/i071xxrdr/I07197005RDR.QUB"], 
+    "ancillarydata": {
+        "slope": 0, 
+        "dustopacity": 0.2945790291, 
+        "elevation": "/home/jlaura/Mars_MGS_MOLA_DEM_mosaic_global_463m.cub", 
+        "slopeazimuth": 0, 
+        "albedo": "/home/jlaura/TES_global_Albedo_Christensen_2001.tif", 
+        "emissivity": 1.0
+    }, 
+    "resolution": [], 
+    "outpath": "/home/jlaura/krc_application",
+    "workingdir": "/scratch/jlaura",
+    "projection": {"name": "None"}
+}

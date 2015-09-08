@@ -9,10 +9,12 @@ import time
 
 import numpy as np
 from scipy.interpolate import interp1d
-import joblib
 
-from app.io import readhdf, readgeodata
+import pychip
+
+from app.fileio import hdf, io_gdal
 from app import config
+from app.utils import utils 
 
 logger = logging.getLogger('ThemisTI')
 
@@ -22,15 +24,10 @@ class EphemerisInterpolator(object):
                     0.90: np.s_[13500:27000],
 		    1.0: np.s_[27000:]}
 
-    elevations = {-5: np.s_[: 2700],
-                  -2: np.s_[2700:5400],
-                  -1: np.s_[5400:8100],
-                  6: np.s_[8100:10800],
-                  8: np.s_[13500:]}
-
     time_lookup = {0:0, 3:1, 6:2, 7:3, 8:4, 9:5, 10:6,
                    12:7, 14:8, 16:9, 24:10, 28:11, 32:12,
                    35:13, 36:14, 40:15, 44:16, 47:17}
+    
     inverse_time_lookup = {v:k for k, v in time_lookup.iteritems()}
 
     latitude_lookup = dict(zip(range(-90, 95, 5), range(37)))
@@ -59,13 +56,13 @@ class EphemerisInterpolator(object):
 	self.temperature = temperature
         self.ancillarydata = ancillarydata
         self.parameters = parameters
-	self.hdffile = readhdf.HDFDataSet()
+	self.hdffile = hdf.HDFDataSet()
 	self.lookuptable = self.hdffile.data
 
         self.startseason = self.parameters['startseason']
         self.stopseason = self.parameters['stopseason']
         self.season = self.parameters['season']
-
+        
 	self.startlookup = self.lookuptable['season_{}'.format(self.startseason)]
 	self.stoplookup = self.lookuptable['season_{}'.format(self.stopseason)]
 
@@ -108,40 +105,23 @@ class EphemerisInterpolator(object):
         """
         Apply a cubic interpolation in hour
         """
-
         #Get the x node values and check they are monotonically increasing
         hourkeys = self.hourslice[self.hoursort]
         x = [self.inverse_time_lookup[k] for k in hourkeys]
-        mask =  np.asarray(self.checkmonotonic(x))
+        mask =  np.asarray(utils.checkmonotonic(x))
         offset =  max(self.time_lookup.keys()) + 1
-        x = np.asarray(x)
+        x = np.asarray(x, dtype = np.float32)
         x[~mask] += offset
         x *= 0.5  #Convert from 48 time steps to 24 hours
-
+        #Reform to monotonic if wrapping
+        idx = utils.checkmonotonic(x).index(False)
+        x[:idx] -= 24.0
         f = interp1d(x, self.data.T,
                      kind = config.HOUR_INTERPOLATION,
                      copy=False)
         starttime = self.parameters['starttime']
         newy = starttime.hour + (starttime.minute / 60.0)
         self.data = f(newy)
-
-    def checkmonotonic(self, iterable):
-        """
-        Check if a given iterable is monotonically increasing.
-
-        Parameters
-        ----------
-        iterable : iterable
-                   Any Python iterable object
-
-        Returns
-        -------
-        monotonic : list
-                    A boolean list of all True if monotonic, or including
-                    an inflection point
-        """
-        monotonic =  [True] + [x < y for x, y in zip(iterable, iterable[1:])]
-        return monotonic
 
     def interpolateseasons(self):
         """
@@ -165,7 +145,7 @@ class EphemerisInterpolator(object):
         Compute the necessary offsets for the provided emissivity
         """
         emissivity = self.ancillarydata['emissivity']
-        if isinstance(emissivity, readgeodata.GeoDataSet):
+        if isinstance(emissivity, io_gdal.GeoDataSet):
             min_emissivity = emissivty.minimum
             max_emissivity = emissivity.maximum
         else:
@@ -189,6 +169,7 @@ class EphemerisInterpolator(object):
         starttime = self.parameters['starttime']
         stoptime = self.parameters['stoptime']
         timediff = stoptime - starttime
+        logger.debug("Start time: {} | Stop time: {}".format(starttime, stoptime))
         if timediff > timedelta(minutes = config.TIME_THRESHOLD):
             logger.debug("Time delta is {}.  This is significantly larger than anticipated".format(timediff))
             self.starttime = starttime
@@ -218,7 +199,7 @@ class EphemerisInterpolator(object):
     def get_lat_offsets(self):
         """
         Given the min and max latitudes, get the full necessary extent.
-        TODO: This might be a bad idea if the images is a huge strip over
+        #TODO: This might be a bad idea if the images is a huge strip over
               a large lat range.
         """
         startlat = self.parameters['startlatitude']
@@ -243,19 +224,10 @@ class EphemerisInterpolator(object):
         logger.debug('Start latitude node is {}.  Nearest lookup node is {}.'.format(startlat, start_idx))
         logger.debug('Stop latitude node is {}.  Nearest lookup node is {}.'.format(stoplat, stop_idx))
 
-# note that this decorator ignores **kwargs
-def memoize(obj):
-    cache = obj.cache = {}
-
-    @functools.wraps(obj)
-    def memoizer(*args, **kwargs):
-        if args not in cache:
-            cache[args] = obj(*args, **kwargs)
-        return cache[args]
-    return memoizer
 
 class ParameterInterpolator(object):
 
+    #TODO: All of these offsets should come from the HDF file, not be hard coded here.
     slopeaz_lookup = {0:np.s_[:540],
                       75:np.s_[540:1080],
                       210:np.s_[1080:1620],
@@ -265,6 +237,12 @@ class ParameterInterpolator(object):
     slope_lookup = {0:np.s_[:180],
                     30:np.s_[180, 360],
                     60:np.s_[360:]}
+
+    elevation_lookup = {-5: np.s_[: 2700],
+                  -2: np.s_[2700:5400],
+                  -1: np.s_[5400:8100],
+                  6: np.s_[8100:10800],
+                  8: np.s_[13500:]}
 
 
     tau_lookup = {0.02:np.s_[:60],
@@ -286,6 +264,7 @@ class ParameterInterpolator(object):
                  lookuptable, latitudenodes, startpixel):
 
         self.temperature = temperature
+        self.ndv = self.temperature.ndv
         self.lookup = lookuptable
         self.td = td
         self.ed = ed
@@ -295,10 +274,20 @@ class ParameterInterpolator(object):
         self.od = od
         self.latitudenodes = latitudenodes
         self.start = startpixel
-
         self.resultdata = np.empty((self.td.shape[0], self.td.shape[1]), dtype=np.float32)
-
         self.computelatitudefunction()
+        
+    def convert_elevation_to_pressure(self):
+        """
+        Convert lookup table and elevation dataset from km to pascals
+        """
+        new_elev = {}
+        for k, v in self.elevation_lookup.iteritems():
+            new_key = self._convert_pressure(k)
+            new_elev[new_key] = elevation_lookup[k]
+
+        self.elevation_lookup = new_elev
+        self.ed = self._convert_pressure(self.ed)
 
     def bruteforce(self):
         """
@@ -315,43 +304,53 @@ class ParameterInterpolator(object):
                 latitude = self.getlatitude(startlat, self.temperature)
                 #Perform the cubic latitude interpolation
                 compressedlookup = self.interpolate_latitude(latitude)
-                self.elevation_interp_f = self.compute_interpolation_function(np.array([-5.0, -2, -1, 6, 8]),
+                self.elevation_interp_f = self.compute_interpolation_function(np.array([-5.0, -2.0, -1.0, 6.0, 8.0]),
                                             compressedlookup, config.ELEVATION_INTERPOLATION)
-            if i % 100 == 0:
-                print i, self.td.shape[0], time.time() - t1
+            #if i % 100 == 0:
+                #print i, self.td.shape[0], time.time() - t1
             for j in xrange(self.td.shape[1]):
-                if self.td[i,j] == self.temperature.ndv:
+                if self.td[i,j] == self.ndv:
                     #The pixel is no data in the input, propagate to the output
-                    self.result = self.temperature.ndv
+                    self.resultdata[i,j] = self.ndv
                 else:
                     #Interpolate elevation
                     elevation = self.ed[i,j]
                     new_elevation = self.interpolate_elevation(elevation)
-
+                    #if i % 100 == 0:
+                        #print new_elevation
                     #Interpolate Slope Azimuth
                     slopeaz_f = self.compute_interpolation_function(self.slopeaz_lookup.keys(),
                                                                     new_elevation,
                                                                     config.SLOPEAZ_INTERPOLATION)
                     #slopeaz_f = self.compute_slope_azimuth_function(new_elevation)
                     new_slopeaz = slopeaz_f(self.sz[i,j])
+                    #if i % 100 == 0:
+                        #print new_slopeaz
                     #Interpolate Slope
                     slope_f = self.compute_interpolation_function(self.slope_lookup.keys(),
                                                                   new_slopeaz,
                                                                   config.SLOPE_INTERPOLATION)
                     #slope_f = self.compute_slope_function(new_slopeaz)
                     new_slope = slope_f(self.sd[i,j])
+
                     #Interpolate Tau
                     tau_f = self.compute_interpolation_function(self.tau_lookup.keys(),
                                                                 new_slope,
-                                                                config.OPACITY_INTERPOLATION)
+                                                                config.OPACITY_INTERPOLATION, bounds_error=True)
                     #tau_f = self.compute_tau_function(new_slope)
+                    #if i % 100 == 0:
+                        #print self.od[i,j]
                     new_tau = tau_f(self.od[i,j])
+                    #if i % 100 == 0:
+                        #print new_tau
                     #Interpolate Albedo
                     albedo_f = self.compute_interpolation_function(self.albedo_lookup.keys(),
                                                                    new_tau,
                                                                    config.ALBEDO_INTERPOLATION)
                     #albedo_f = self.compute_albedo_function(new_tau)
                     new_albedo = albedo_f(self.ad[i,j])
+                    #if i % 100 == 0:
+                        #print new_albedo, self.td[i,j], i,j
                     #Interpolate Inertia
                     self.resultdata[i,j], uncertainty = self.interpolate_ti(self.td[i,j], new_albedo)
 
@@ -406,7 +405,7 @@ class ParameterInterpolator(object):
         inertia =  math.exp(rterp)
         return inertia, uncertainty
 
-    @memoize
+    @utils.memoize
     def interpolate_elevation(self, elevation):
        return self.elevation_interp_f(elevation)
 
@@ -448,10 +447,13 @@ class ParameterInterpolator(object):
         """
         Given the x, y values, generate the latitude interpolation function
         """
-        x = self.latitudenodes
-        self.lat_f = interp1d(x, self.lookup,
-                              kind = config.LATITUDE_INTERPOLATION,
-                              copy = True)
+        x = np.array(self.latitudenodes)
+        #self.lat_f = interp1d(x, self.lookup,
+                              #kind = config.LATITUDE_INTERPOLATION,
+                              #copy = True)
+        self._m = np.empty(self.lookup.shape)
+        for i, row in enumerate(self.lookup):
+            self._m[i] = pychip.pchip_slopes(x, row, kind='secant', tension=1)
 
     def interpolate_latitude(self, latitude):
         """
@@ -462,8 +464,14 @@ class ParameterInterpolator(object):
         latitude : float
                    The latitude at which interpolation is to occurs
         """
-        #TODO: The reshape is hard coded, can I get this from the hdf5 file?
-        return self.lat_f(latitude).reshape(5, 5, 3, 3, 3, 20)
+        #TODO: The shape / reshape are hard coded, can I get this from the hdf5 file?
+        #return pychip.pchip_eval(self.latitude_nodes, self.lookup, self._m, latitude).reshape(5,5,3,3,3,20)
+        x = np.array(self.latitudenodes)
+        res = np.empty(13500)
+        for i, row in enumerate(self.lookup):
+            res[i] = pychip.pchip_eval(x, row, self._m[i], np.repeat(latitude, len(x)))[0]
+        return res.reshape(5,5,3,3,3,20)
+        #return self.lat_f(latitude).reshape(5, 5, 3, 3, 3, 20)
 
     def getlatitude(self, y, geoobject):
         """
@@ -482,3 +490,22 @@ class ParameterInterpolator(object):
         """
         latitude, longitude = geoobject.pixel_to_latlon(0, y)
         return latitude
+
+    def _convert_pressure(self, elevation):
+        """
+        Convert from raw elevation, in km, to pressure in Pascals using
+        Hugh Kieffer's algorithm.
+
+        689.7 is the constant pressure at sea level
+
+        Parameters
+        -----------
+        elevation : float or ndarray
+                    elevation in km
+
+        Returns
+        --------
+          : float
+            Pressure in Pascals
+        """
+        return 689.7 * np.exp(-elevation / 10.8)
