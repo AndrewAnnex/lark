@@ -1,0 +1,30 @@
+#! /usr/env python
+
+import pexpect
+import sys
+import os
+
+binary = sys.argv[1]
+fname = sys.argv[2]
+version = sys.argv[3]
+i = 0
+child = pexpect.spawn(binary)
+while True:
+    data = child.readline()
+    if str.encode('This is KRC') in data:
+        continue
+    elif str.encode('Input file name') in data:
+        if version == '321':
+            stripped = fname.rstrip()  # For 3.2.1
+        else:
+            stripped = os.path.splitext(fname)[0]  # For 3.4.3, 3.4.4, 3.5.4
+        child.sendline(stripped)
+    elif str.encode('Print file name') in data:
+        pf = os.path.splitext(fname)[0] + '.prt'
+        child.sendline(pf)
+    elif data == b'':
+        i += 1
+    if i > 5:
+        break
+        child.sendline(' ')
+    #   #print('BREAKING')

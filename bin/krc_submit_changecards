@@ -1,0 +1,28 @@
+#! /usr/env python
+
+import argparse
+import glob
+
+from krc.utils.slurm import submitjob
+
+def parseargs():
+    desc = 'Given a directory of krc input files, process each file in parallel on a slurm cluster.'
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                     description=desc)
+    parser.add_argument('-x', '--extension',
+                        dest='extension',
+                        default='.inp',
+                        help='The extension used to create the change card.')
+    parser.add_argument(dest='inputdir',
+                        help='The directory containing the input files.')
+    parser.add_argument('-v', '--version', type=int, default=355, help='The version of KRC being used.')
+    parser.add_argument('workingdir', help='The working directory to be used.')
+    parser.add_argument('binary', help='The PATH to the krc binary that will do the processing.')
+    return parser.parse_args()
+
+
+if __name__ == '__main__':
+    args = parseargs()
+    searchpath = '{}/*{}'.format(args.inputdir, args.extension)
+    changecards = glob.glob(searchpath)
+    submitjob(changecards, args.binary, args.version, args.workingdir)

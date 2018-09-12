@@ -1,0 +1,200 @@
+#! /usr/env python
+
+import argparse
+import itertools
+import json
+import os
+
+import h5py as h5
+import numpy as np
+
+from krc.utils.utils import computeinertia
+
+def parse_args():
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-x', '--extension',
+                        dest='extension',
+                        default='.tds',
+                        help='The file extension for the lookup tables.')
+    parser.add_argument('-c', '--config',
+                        dest='config',
+                        default='parameters.config',
+                        help='JSON file with change card parameters.')
+    parser.add_argument('-a', '--albedo',
+                        dest='albstr',
+                        default='a',
+                        help='The albedo abbreviation used in the file name.')
+    parser.add_argument('-i', '--inertia',
+                        dest='inertiastr',
+                        default='sk',
+                        help='The inertia abbreviation used in the file name.')
+    parser.add_argument('-t', '--tau',
+                        dest='taustr',
+                        default='t',
+                        help='The tau abbreviation used in the file name.')
+    parser.add_argument('-v', '--version',
+                        default=355,
+                        help='The KRC version used to create the lookups.')
+    parser.add_argument('-n', '--nlats',
+                        default=37,
+                        help='The number of latitudes in the KRC lookup tables')
+    parser.add_argument('-d', '--nhours',
+                        default=48,
+                        help='The number of time steps in the KRC lookup tables')
+    parser.add_argument('-s', '--nseasons',
+                        default=80,
+                        help='The number of seasons in the KRC lookup tables')
+    parser.add_argument(dest='tabledir',
+                        help='The directory containing the KRC lookup tables')
+    parser.add_argument(dest='outputfile',
+                       help='The name of the output file')
+
+    return parser.parse_args()
+
+def create_groups(f, ngroups=80):
+    """
+    Create groups in an h5 file.
+
+    Parameters
+    ----------
+    f : object
+        An h5py file object
+    ngroups : int
+              The number of groups / seasons to create
+    Returns
+    -------
+    groups : list
+             A list of the available groups
+    """
+    groups = []
+    for i in range(ngroups):
+        g = f.create_dataset('season_{}'.format(i),
+                             #(18,37,40500),
+                             (18, 37, 48600),
+                             #chunks=(18, 37, 20),
+                             chunks=(18,37, 80),
+                             dtype=np.float32,
+                             compression="gzip",
+                             compression_opts=6)
+        groups.append(g)
+    return groups
+
+def create_h5_file(args):
+    #Setup the H5 file
+    f = h5.File(args.outputfile, 'w')
+    #Tag attributes
+    f.attrs['emissivity_offsets'] = '''{0.85: np.s_[:13500],
+                                     0.90: np.s_[13500:27000],
+                                     1.0: np.s_[27000:]}'''
+
+    f.attrs['slopeaz_lookup'] = '''{0:np.s_[:540],
+                      75:np.s_[540:1080],
+                      210:np.s_[1080:1620],
+                      285:np.s_[1620:2160],
+                  print('groups created')
+        360:np.s_[2160:]}'''
+
+    f.attrs['slope_lookup'] = '''{0:np.s_[:180],
+                    15:np.s_[180, 360],
+                    30:np.s_[360:]}'''
+
+    f.attrs['elevation_lookup'] = '''{-5: np.s_[: 2700],
+                  -2: np.s_[return d[:48, :, ::2]2700:5400],
+                  -1: np.s_[5400:8100],
+                  6: np.s_[8100:10800],
+                  8: np.s_[13500:]}'''
+
+
+    f.attrs['tau_lookup'] = '''{0.02:np.s_[:60],
+                  0.30:np.s_[60:120],
+                  0.62:np.s_[120:]}'''
+
+    f.attrs['albedo_lookup'] = '''{0.08:np.s_[:20],
+                     0.22:np.s_[20:40],
+                     0.32:np.s_[40:]}'''
+
+    return f
+
+def main(args):
+    f = create_h5_file(args)
+    groups = create_groups(f)
+
+    with open(args.config, 'r') as config:
+        parameters = json.load(config)
+
+    # Parse albedo
+    nalb = len(parameters['albedo'])
+    albs = [i for i in parameters['albedo']]
+
+    # Parse the inertia into log space
+    ninertia = parameters['inertia'][2]
+    inertias = computeinertia(parameters['inertia']).tolist()
+
+    # Parse Tau
+    tau = parameters['tau']
+    ntau = len(tau)
+    taus = [i for i in tau]
+
+    # Parse elevations
+    elev = parameters['elevation']
+    nelev = len(elev)
+    elevstr = [i for i in elev]
+
+    # Parse emissivity
+    emissivity = parameters['emissivity']
+    nemiss = len(emissivity)
+    emissivities = [i for i in emissivity]
+
+    # Parse SlopeAZ
+    slopeaz = parameters['slope_azimuth']
+    nslopeaz = len(slopeaz)
+    slopeazs = [i for i in slopeaz]
+
+    # Parse Slopes
+    slope = parameters['slope']
+    nslope = len(slope)
+    slopes = [i for i in slope]
+
+    total = nalb * ninertia * ntau * nemiss * nslopeaz * nslope * nelev
+    print("Reading {} files.".format(total))
+
+    combinations = list(itertools.product(emissivities, elevstr, slopeazs, slopes, taus, albs, inertias))    
+    time_idx = [0,3, 6, 7, 8, 9, 10, 12, 14, 16, 24, 28, 32, 35, 36, 40, 44, 47]
+
+    cnt = 0
+    for c in combinations:
+        if c[1] < 0:
+            el = 'em' + str(abs(int(c[1])))
+        else:
+            el = 'ep' + str(abs(int(c[1])))
+        fname = 'sk{0:04d}a{1:03d}t{2:03d}es{3:03d}{4}az{5:03d}sl{6:03d}{7}'.format(int(c[6]),
+                                                                                    int(c[5] * 100),
+                                                                                    int(c[4] * 100),
+                                                                                    int(c[0] * 100),
+                                                                                    el,
+                                                                                    int(c[2]),
+                                                                                    int(c[3]),
+                                                                                    args.extension)
+        if args.version == 321:
+            multi = 32
+        else:
+            multi = 16
+        datastart = args.nlats * args.nhours * multi
+        try:
+            with open(os.path.join(args.tabledir, fname), 'rb') as f:
+                f.seek(datastart)
+                data = np.fromfile(f, dtype=np.float64).reshape((96, 37, -1), order='F')
+                data = data[:48, :, ::2]
+        
+            for i in range(args.nseasons):
+                groups[i][:,:,cnt] = data[time_idx,:,i]
+            cnt += 1
+        except:
+            print(fname)
+            break
+        print("{}/{}".format(cnt, total), end='\r')
+    f.close()
+
+if __name__ == '__main__':
+    args = parse_args()
+    main(args)

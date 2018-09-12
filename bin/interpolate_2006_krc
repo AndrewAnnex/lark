@@ -1,0 +1,440 @@
+#!/home/jlaura/anaconda3/envs/krc/bin/python
+
+import glob
+import logging
+import os
+import re
+import subprocess
+import sys
+import time
+
+import numpy as np
+from mpi4py import MPI
+from plio.io import io_gdal, io_hdf, io_json
+from plio.date import astrodate, julian2ls, julian2season
+import plio.utils
+from plio.utils import log
+
+import pysis
+from pysis import isis
+import pvl
+
+from krc.wrappers import pipelinewrapper
+from krc.utils import utils
+from krc.interpolation import interpolator_2006 as interp
+from krc import config
+
+#Constants
+instrumentmap = {'THERMAL EMISSION IMAGING SYSTEM':'THEMIS'}  #Mapping of instrument names as stored in the header to short names
+processingpipelines = {'themis_davinci':pipelinewrapper.themis_davinci}
+
+def getincidence(parsestring):
+    """
+    Extract the incidence angle from a campt string
+    """
+    incidence_search = re.compile(r'\s*Incidence', flags=re.I)
+    for l in parsestring.splitlines():
+        if incidence_search.match(l):
+            return float(l.split('=')[1].rstrip())
+
+def getlatitude(parsestring):
+    """
+    Extract the planetocentric latitude angle from a campt string
+    """
+    latitude_search = re.compile(r'\s*PlanetocentricLatitude', flags=re.I)
+    for l in parsestring.splitlines():
+        if latitude_search.match(l):
+            return float(l.split('=')[1].rstrip())
+
+def radiance_to_temperature(image, jobs, workingpath):
+    """
+    Run the images through a processing pipeline to convert to temperature.
+
+    Parameters
+    ----------
+    image       str PATH to the image to be processed
+    jobs        dict Parameters used in the processing
+
+    """
+    pipeline = jobs['processing_pipeline']
+
+    if pipeline == 'themis_davinci':
+        if 'deplaid' in jobs.keys():
+            #User defined deplaid, cast to int for Davinci
+            deplaid = int(jobs['deplaid'])
+        else:
+            #Fallback to standard deplaid
+            deplaid = 1
+            if deplaid == 'day':
+                deplaid = 0
+        return pipelinewrapper.themis_davinci(image,
+                                                 int(jobs['uddw']),
+                                                 int(jobs['tesatm']),
+                                                 deplaid,
+                                                 int(jobs['rtilt']),
+                                                 int(jobs['force']),
+                                                 workingpath)
+
+def processimages(jobs, i):
+    """
+    Process a json object containing URIs for one or more jobs
+
+    Parameters
+    ----------
+    jobs : dict    
+           A dictionary of jobs containing an image list and 
+           processing parameters
+
+    Returns
+    -------
+
+
+    """
+    
+    t1 = time.time()
+    #Check the ISIS version
+    pysis.check_isis_version(3, 4)
+
+    image_path = jobs['images']
+    if len(image_path) == 1:
+        #Check if this is a directory
+        if os.path.isdir(image_path[0]):
+            image_path = glob.glob(os.path.join(image_path[0], '*'))
+
+    #Pregenerate ancillary data structure
+    ancillarydata = jobs['ancillarydata']
+    for k, v in ancillarydata.items():
+        if v == 'None':
+            logger.error('A {} dataset was not provided'.format(k))
+            continue
+        ancillarydata[k] = v  # readgeodata.GeoDataset(v)
+
+    #TODO Check with Trent - is this dumb to offer reprojection?
+    #TODO Add reprojection attempt to get ancillary data into the right form.
+
+    #Parse all of the input files and apply the parameters to each
+    logger.info('Processing {} images.'.format(len(image_path)))
+    #Ensure that the file exists at the PATH specified
+    if os.path.isfile(jobs['images'][i]) == False:
+        logging.error("Unable to find file: {}\n".format(jobs['images'][i]))
+        sys.exit()
+
+    logger.info('Reading image {}'.format(jobs['images'][i]))
+    header = pvl.load(jobs['images'][i])
+    bands = utils.find_in_dict(header, 'BAND_BIN_BAND_NUMBER')
+    #bands = header['BAND_BIN_BAND_NUMBER']
+
+    #Extract the instrument name
+    if not 'name' in jobs.keys() or jobs['name'] == None:
+        instrument = utils.find_in_dict(header, 'INSTRUMENT_NAME')
+        jobs['name'] = instrumentmap[instrument]
+
+    #Check that the required bands are present
+    if not utils.checkbandnumbers(bands, jobs['bands']):
+        logger.error("Image {} contains bands {}.  Band(s) {} must be present.\n".format(i, bands, jobs['bands']))
+        sys.exit()
+
+    if 'kerneluri' in jobs['projection'].keys():
+        kernel = jobs['projection']['kerneluri']
+    else:
+        kernel = None
+    #Checks passed, create a temporary working directory
+    workingpath = plio.utils.utils.create_dir(basedir=jobs['workingdir'])
+    image = jobs['images'][i]
+    basepath, fname = os.path.split(image)
+    fname, _ = os.path.splitext(fname)
+    #Convert to ISIS
+    outcube = os.path.join(workingpath, '{}.cub'.format(fname))
+
+    isis.thm2isis(from_=jobs['images'][i],
+                  to=outcube)
+    
+    #TODO I am running spiceinit and campt only to get the incidence angle - what about running a database
+    #Spiceinit
+    #isis.spiceinit(from_=outcube, ck=kernel)
+    if kernel:
+        isis.spiceinit(from_=outcube, ck=kernel)
+    else:
+        isis.spiceinit(from_=outcube)
+    #Campt - To get incidence angle and local solar time
+    header = pvl.load(outcube)
+    samples = utils.find_in_dict(header, 'Samples')
+    lines = utils.find_in_dict(header, 'Lines')
+    
+    coordinatelist = os.path.join(workingpath, 'coordinatelist.lis')
+    with open(coordinatelist, 'w') as f:
+        f.write('{},{}\n'.format(samples/2, lines/2))
+        f.write('1,1\n') #UpperLeft
+        f.write('{},{}\n'.format(samples-1, lines-1)) #LowerRight
+
+    campt = pvl.loads(isis.campt(from_=outcube, to=os.path.join(workingpath, fname + '_campt.pvl'),
+                      usecoordlist='yes', coordlist=coordinatelist,
+                      coordtype='image'))
+    for j, g in enumerate(campt.items()):
+        if j == 0:
+            #Incidence at the center of the image
+            incidence = g[1]['Incidence']
+        elif j == 1:
+            #Upper Left Corner Pixel
+            stoplocaltime = g[1]['LocalSolarTime'].value
+        elif j == 2:
+            #Lower Right Corner Pixel
+            startlocaltime = g[1]['LocalSolarTime'].value
+
+    deplaid = utils.checkdeplaid(incidence)
+    logger.info("If deplaid is set in the input parameters, using {} deplaid routines".format(deplaid))
+
+    #Process temperature data using some pipeline
+    dvcube = radiance_to_temperature(jobs['images'][i], jobs, workingpath)
+    
+    #Processing the temperature to a level2 image
+    if kernel:
+        isis.spiceinit(from_=dvcube, ck=kernel)
+    else:
+        isis.spiceinit(from_=dvcube)
+    
+    isiscube = os.path.join(workingpath, '{}_proj.cub'.format(fname))
+    isis.cam2map(from_=dvcube, to=isiscube,
+                 map='$base/templates/maps/simplecylindrical.map')
+    header = pvl.load(isiscube)
+    
+    ulx = maxlat = utils.find_in_dict(header, 'MaximumLatitude')
+    uly = utils.find_in_dict(header, 'MinimumLongitude')
+    lrx = minlat = utils.find_in_dict(header, 'MinimumLatitude')
+    lry = utils.find_in_dict(header, 'MaximumLongitude')
+
+    logger.info('Processing ISIS cube: {}.'.format(isiscube))
+   
+    #Get the temperature array
+    temperature = io_gdal.GeoDataset(isiscube)
+    processing_resolution = temperature.pixel_width
+    #temparray = temperature.read_array(band=2)
+    tempshape = list(temperature.raster_size)[::-1]
+    logger.info('Themis temperature data has {} lines and {} samples'.format(tempshape[0], tempshape[1]))
+    srs = temperature.spatial_reference.ExportToWkt()
+    gt = temperature.geotransform
+    logger.info('The input temperature image projection is: {}'.format(srs))
+
+    #Iterate through the ancillary data.  Clip and resample to the input image
+    for k, v in ancillarydata.items():
+            if isinstance(v, int) or isinstance(v, float):
+                #The user wants a constant value to be used
+                arr = np.empty(tempshape, dtype=np.float32)
+                arr[:] = v
+                ancillarydata[k] = arr
+                logger.debug('{} set to a constant value, {}'.format(k, v))
+                del arr
+            elif v != 'None':
+                basename = os.path.basename(v)
+                root, extension = os.path.splitext(basename)
+                
+                #Clip and resample the image to the correct resolution
+                tif = os.path.join(workingpath, root + '.tif')
+                v = io_gdal.GeoDataset(v)
+                io_gdal.match_rasters(temperature, v, tif)
+                
+                #Read the resampled tif and extract the array
+                ancillarydata[k] = io_gdal.GeoDataset(tif)
+                logger.debug('Dataset {} extract.'.format(v))
+
+    bands = utils.find_in_dict(header,'BandNumber')
+    logger.debug('Input TI image has bands {}'.format(bands))
+    logger.debug('Input TI image LAT range is {} to {}'.format(minlat, maxlat))
+
+    #TODO: This would be nicely abstracted to a transformation chain, a la VisPy 3d transforms
+    #Time Parsing
+    starttime = utils.find_in_dict(header, 'StartTime')
+    stoptime = utils.find_in_dict(header, 'StopTime')
+
+    #Convert UTC to Julian
+    starttime_julian = astrodate.utc2jd(starttime)
+    stoptime_julian = astrodate.utc2jd(stoptime)
+    logger.debug('Input TI image time range is {} to {} (Julian)'.format(starttime_julian, stoptime_julian))
+
+    #LsubS
+    startlsubs, startmartianyear = julian2ls.julian2ls(starttime_julian)
+    stoplsubs, stopmartianyear = julian2ls.julian2ls(stoptime_julian)
+    season, startseason, stopseason = julian2season.j2season(startlsubs)
+
+    logger.debug('Input TI image time range is {} / {} to {} / {} (LsubS)'.format(startlsubs[0],startmartianyear[0],
+                                            stoplsubs[0], stopmartianyear[0]))
+    season = season[0]
+    logger.debug('Season: {}, Start Season: {}, Stop Season {}'.format(season, startseason, stopseason))
+    #Pack the initial parameters for shipping to the interpolator
+    parameters = {'starttime':startlocaltime,
+                  'stoptime':stoplocaltime,
+                  'startseason': startseason,
+                  'stopseason':stopseason,
+                  'season':season,
+                  'startlatitude':minlat,
+                  'stoplatitude':maxlat,
+                  'lookuptables':jobs['lookuptables']}
+    t2 = time.time()
+    logger.info('Data pre-processing, clipping, and map projection took {} seconds.'.format(t2 - t1))
+    return temperature, parameters, ancillarydata, workingpath
+
+if __name__ == "__main__":
+    comm = MPI.COMM_WORLD
+    rank = comm.rank
+
+    if rank == 0:
+        t_start = time.time()
+        #Setup logging
+        log.setup_logging(level=config.LOG_LEVEL)
+
+        logger = logging.getLogger(__name__)
+
+        #Parse the job input
+        if len(sys.argv) < 2:
+            logger.error("Please supply an input configuration file.")
+            sys.exit()
+        logger.info("Processing using {} cores".format(comm.size))
+        jobs = io_json.read_json(sys.argv[1])
+        njobs = len(jobs['images'])
+    else:
+        njobs = None
+
+    njobs = comm.bcast(njobs, root=0)
+    for i in range(njobs):
+        if rank == 0:
+            temperature, parameters, ancillarydata, workingpath = processimages(jobs, i)
+            hdffile = io_hdf.HDFDataset(parameters['lookuptables'])
+            t1 = time.time()
+            eph = interp.EphemerisInterpolator(temperature, ancillarydata, parameters, hdffile)
+            eph.interpolate_ephemeris()
+        
+            lookup = eph.data
+            logger.debug('Lookup table dtype is: {}, with a shape of: {}'.format(lookup.dtype, lookup.shape))
+            lookup_shape = lookup.shape
+            latitude_nodes = eph.latitudes[eph.latslice]
+            t2 = time.time()
+            logger.info('Extracting lookup table and season/hour interpolation took {} seconds'.format(t2 - t1))
+
+            #Extract all of the necessary input data arrays
+            td_g = temperature.read_array()
+            y, x = td_g.shape
+            result_cube = np.empty((y, x, 8), dtype=np.float32)
+            result_cube[:,:,2] = td_g
+
+            # TODO: Magic number here for m to km conversion is poor form.
+            if not isinstance(ancillarydata['elevation'], np.ndarray):
+                ed_g = result_cube[:,:,3] = ancillarydata['elevation'].read_array() / 1000.0
+            else:
+                ed_g = result_cube[:,:,4] = ancillarydata['elevation']
+
+            if not isinstance(ancillarydata['albedo'], np.ndarray):
+                ad_g = result_cube[:,:,6] = ancillarydata['albedo'].read_array()
+            else:
+                ad_g = result_cube[:,:,7] = ancillarydata['albedo']
+
+            if not isinstance(ancillarydata['dustopacity'], np.ndarray):
+                od_g = result_cube[:,:,7] = ancillarydata['dustopacity'].read_array()
+            else:
+                od_g = result_cube[:,:,7] = ancillarydata['dustopacity']
+
+            quotient, remainder = divmod(y, comm.size)
+            qrs = (quotient, remainder, td_g.shape)
+            ndv = temperature.no_data_value
+            logger.debug('The input temperature dataset has a NoDataValue of {}'.format(ndv))
+            temp_fname = temperature.file_name
+            logger.debug('Generated all data structures for communication.')
+        else:
+            #Allocate memory in child processes
+            lookup_shape = None
+            latitude_nodes = None
+            td_g = ed_g = sd_g = sz_g = ad_g = od_g = None
+            qrs = None
+            ndv = None
+            temp_fname = None
+
+        #Broadcast scalars
+        lookup_shape = comm.bcast(lookup_shape, root=0)
+        latitude_nodes = comm.bcast(latitude_nodes, root=0)
+        quotient, remainder, shape = comm.bcast(qrs, root=0)
+        ndv = comm.bcast(ndv, root=0)
+        temp_fname = comm.bcast(temp_fname, root=0)
+        comm.Barrier()
+
+        if rank == 0:
+            logger.debug('Lookup table shape is {}'.format(lookup_shape))
+            logger.debug('Transmitted scalars and temperature geoobject to all cores.')
+            tb1 = time.time()
+
+        #Broadcast the ephemeris data (lookup tables)
+        if rank != 0:
+            lookup = np.empty(lookup_shape, dtype=np.float64)
+            temperature = io_gdal.GeoDataset(temp_fname)
+        comm.Bcast( [lookup, MPI.DOUBLE])
+        
+        if rank == 0:
+            tb2 = time.time()
+            logger.debug('Broadcast ephemeris data to all cores in {} seconds.'.format(tb2-tb1))
+
+        #Compute the scatter offsets and scatter the input datasets
+        if rank == 0:
+            localshape = (quotient + remainder, shape[1])
+        else:
+            localshape = (quotient, shape[1])
+
+        td = np.empty(localshape, dtype=np.float32)
+        ed = np.empty(localshape, dtype=np.float32)
+        ad = np.empty(localshape, dtype=np.float32)
+        od = np.empty(localshape, dtype=np.float32)
+
+        #Compute the scatter and gather offsets
+        scattersize = list([(quotient + remainder) * shape[1]]) +\
+                      [quotient * shape[1] for i in range(comm.size-1)]
+        scatteroffsets = [0] + (np.cumsum(scattersize)[:-1]).tolist()
+
+        for g, l in [(td_g, td), (ed_g, ed),
+                     (ad_g, ad), (od_g, od)]:
+            comm.Scatterv([g, scattersize, scatteroffsets, MPI.FLOAT],
+                          [l, MPI.FLOAT])
+
+        comm.Barrier()
+        if rank == 0:
+            tb3 = time.time()
+            logger.debug('Scatter input data to all cores in {} seconds.'.format(tb3 - tb2))
+
+        #Compute the start pixel for each chunk
+        startpixel = rank * quotient
+        if rank == 0:
+            startpixel += remainder
+            ta = time.time()
+
+        param_interp = interp.ParameterInterpolator(temperature, td, ed,
+                                                    od, ad, lookup,
+                                                    latitude_nodes, startpixel)
+        
+        #Begin the interpolation
+        param_interp.compute_latitude_function()
+        param_interp.bruteforce()
+        
+        if rank != 0:
+            result = None
+        if rank == 0:
+            tb = time.time()
+            logger.debug("Parameter interpolation took {} seconds".format(tb-ta))
+            result = np.empty(td_g.shape, dtype = np.float32)
+        comm.Gatherv([param_interp.resultdata, MPI.FLOAT],
+                     [result, scattersize, scatteroffsets, MPI.FLOAT],
+                     root=0)
+
+        if rank == 0:
+            tc = time.time()
+            logger.debug("Result gather took {} seconds".format(tc - tb))
+            result_cube[:,:,0] = result
+
+            outpath = os.path.join(jobs['outpath'], temperature.base_name)
+            logger.debug('Writing to {}.tif'.format(outpath))
+            io_gdal.array_to_raster(result, '{}.tif'.format(outpath),
+                                         projection=temperature.spatial_reference,
+                                         geotransform=temperature.geotransform,
+                                         ndv=temperature.no_data_value)
+
+            td = time.time()
+            logger.debug("Final result write took {} seconds".format(td-tc))
+            #Cleanup
+            logger.debug("Removing the remporary working directory at {}".format(workingpath))
+            #plio.utils.utils.delete_dir(workingpath)
+            logger.info("Processing image {} required {} seconds".format(temperature.base_name, tb - t_start))

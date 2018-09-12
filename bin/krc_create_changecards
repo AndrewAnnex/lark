@@ -1,0 +1,63 @@
+#! /usr/env python
+
+import argparse
+import json
+
+from krc.changecards.header import header
+from krc.changecards.changecards import createchangecards
+
+def parse_args():
+    """
+    Standard single parser argument parser for
+    commandline parameterization.
+
+    Defaults populated from Hugh Keiffer's
+    writeinpfile.pro
+    """
+
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-c', '--config',
+                        dest='config',
+                        default='parameters.config',
+                        help='JSON file with change card parameters.')
+    parser.add_argument('-x', '--extension',
+                        dest='ext',
+                        default='.tds',
+                        help='The file extension for the output models')
+    parser.add_argument('-m', '--mellon',
+                        dest='mellon',
+                        action='store_true',
+                        help='Flag to generate Mellon, instead of HK tables')
+    parser.add_argument('-a', '--albedo',
+                        dest='albstr',
+                        default='a',
+                        help='The albedo abbreviation used in the file name.')
+    parser.add_argument('-i', '--inertia',
+                        dest='inertiastr',
+                        default='sk',
+                        help='The inertia abbreviation used in the file name.')
+    parser.add_argument('-t', '--tau',
+                        dest='taustr',
+                        default='t',
+                        help='The tau abbreviation used in the file name.')
+    parser.add_argument('-n', '--ncores', 
+                        default=40,
+                        type=int,
+                        help='The number of cores to user to partition processing. This is cores per elevation.')
+    parser.add_argument(
+        dest='outfilename', help='Required: The output filename.  Supply the full PATH or the output will be created in the same directory as this script.')
+    parser.add_argument(
+        dest='outdir', help='Required: The output directory where KRC will write model files')
+    return parser.parse_args()
+
+def main(args):
+    with open(args.config, 'r') as f:
+        parameters = json.load(f)
+    createchangecards(header, parameters, args.outfilename, args.outdir,
+                      albstr=args.albstr, inertiastr=args.inertiastr,
+                      taustr=args.taustr, npartitions=args.ncores)
+
+if __name__ == '__main__':
+    args = parse_args()
+    main(args)

@@ -1,0 +1,141 @@
+#! /home/jlaura/anaconda3/envs/krc/bin/python
+
+import argparse
+import json
+import logging
+import os
+import shlex
+import subprocess
+import sys
+
+import pysis
+
+
+def parsearguments():
+    """
+    Render help and parse the command line arguments
+
+    Parameters
+    ----------
+    None
+
+    Return
+    ------
+    args    (class instance)  An argparse class instance
+    """
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('inputfile', help='Input JSON configuration file to execute the job')
+    parser.add_argument('-w', '--walltime', default='05:00:00', dest='walltime', help='Walltime for the job on ths cluster')
+    parser.add_argument('-n', '--nodes', default=1, type=int, dest='nnodes', help='The number of nodes to use for processing')
+    parser.add_argument('-c', '--cores', default=12, type=int, dest='ncores', help='The number of cores to use per node')
+
+    return parser.parse_args()
+
+def validateinputs(parser):
+    """
+    Validates PATHs and inputs
+
+    Parameters
+    ----------
+    parser      (instance) An instance of the parser class
+
+    Returns
+    -------
+    None
+    """
+
+    if not os.path.exists(parser.inputfile):
+        logger.error( "Unable to locate the input file at {}".format(parser.inlist) )
+        sys.exit()
+    return
+
+def setuplogger(logfile):
+    """
+    Setup the logger with both a STDOUT logger that reports info and
+    a file logger that reports info and debug information.
+
+    Parameters
+    -----------
+    logfile     (str) The output path for the log file.
+
+    Returns
+    -------
+    logger      (instance) The logger object
+    """
+
+    logger = logging.getLogger('joblogger')
+    logger.setLevel(logging.DEBUG)
+
+    #Log to a file
+    flog = logging.FileHandler(logfile)
+    flog.setLevel(logging.DEBUG)
+
+    slog = logging.StreamHandler()
+    slog.setLevel(logging.INFO)
+
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    flog.setFormatter(formatter)
+    slog.setFormatter(formatter)
+
+    logger.addHandler(flog)
+    logger.addHandler(slog)
+
+    return logger
+
+def submitjobs(inputfile, walltime, nnodes, ncores, subcmd='qsub'):
+    """
+    Parse a list of jobs and submit them using qsub
+
+    Parameters
+    ----------
+    procq       (list) Jobs to iterate
+    params      (dict) Parameters
+    walltime    (str) The walltime to submit the job with.
+    subcmd      (str) Submission command, e.g. qsub or msub
+
+    Returns
+    -------
+    None
+    """
+    # Setup the command that is submitted to the mother process
+    command = '/home/jlaura/anaconda3/envs/krc/bin/mpirun -n {} --hostfile /home/jlaura/krc_application/bin/hostfile.lis /home/jlaura/krc_application/bin/interpolate_2006_krc {} '.format(nnodes * ncores,
+                                                                inputfile)
+
+    # Set up the PBS script that manages the cluster
+    logname = os.path.splitext(os.path.basename(inputfile))[0]
+    logname = '{}_{}'.format(logname, nnodes * ncores)
+
+    job_string="""#!/bin/bash
+#PBS -S /bin/bash
+#PBS -N 'ThemisTI_Processing'
+#PBS -V
+#PBS -o {}.log
+#PBS -e {}.log
+#PBS -l nodes={}:ppn={}
+#PBS -l walltime={}
+module load openmpi-x86_64
+{}
+""".format(logname, logname, nnodes, ncores, walltime, command)
+    
+    process = subprocess.Popen(['qsub'], stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE)
+    print(process)
+    print(job_string)
+    process.stdin.write(str.encode(job_string))
+
+    out, err = process.communicate()
+    if err:
+        print(err)
+    return
+
+def main():
+    # Check the ISIS version before we even ship to the cluster
+    pysis.check_isis_version(3,4)
+    parser = parsearguments()
+    validateinputs(parser)
+
+    submitjobs(parser.inputfile, parser.walltime, parser.nnodes, parser.ncores)
+
+if __name__ == '__main__':
+    main()
