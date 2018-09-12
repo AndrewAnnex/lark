@@ -11,3 +11,7 @@
 *.cub
 *.vrt
 *.cub.*
+
+.dvlog
+print.prt
+
