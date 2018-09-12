@@ -6,6 +6,9 @@
 *.ipynb_checkpoints
 *.pyc
 *.log
+*.ropeproject/
+*_config.json
+*.list
 
 #Geospatial
 *.cub
