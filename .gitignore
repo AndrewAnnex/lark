@@ -11,7 +11,9 @@
 *.cub
 *.vrt
 *.cub.*
+*.tif 
 
+# 3rd Party Logs
 .dvlog
 print.prt
 
