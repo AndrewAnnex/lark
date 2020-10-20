@@ -1,0 +1,12 @@
+name: krc
+dependencies:
+ - mpi4py
+ - numpy
+ - plio
+ - pvl
+ - pysis
+ - scipy
+ - python>=3.6
+ - jupyter
+ - matplotlib
+ - gdal<3

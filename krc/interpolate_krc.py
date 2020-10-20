@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import glob
 import logging
 import os
@@ -255,6 +257,7 @@ def extract_ancillary_data(job, temperature, parameters, workingpath, shape, ref
 
     #Iterate through the ancillary data.  Clip and resample to the input image
     for k, v in ancillarydata.items():
+        print(k, v)
         dustopacity_band = 1
         if isinstance(v, int) or isinstance(v, float):
             #The user wants a constant value to be used
@@ -302,6 +305,7 @@ def extract_ancillary_data(job, temperature, parameters, workingpath, shape, ref
         tif = os.path.join(workingpath, os.path.basename(v))
         #Clip and resample the image to the correct resolution
         v = io_gdal.GeoDataset(v)
+        print(v, reference_dataset)
         io_gdal.match_rasters(reference_dataset, v, tif, ndv=v.no_data_value)
         #Read the resampled tif and extract the array
         ancillarydata[k] = io_gdal.GeoDataset(tif)

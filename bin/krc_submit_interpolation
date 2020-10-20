@@ -19,10 +19,13 @@ submission_strings = {'slurm':textwrap.dedent("""\
                                               #SBATCH --mem-per-cpu 4500
                                               #SBATCH -p longall
                                               #SBATCH --exclude=neb[17-20],gpu1
-                                              source /usgs/cpkgs/isis3/isis3mgr_scripts/initIsis.sh isis3
+                                              source /home/jlaura/anaconda3/etc/profile.d/conda.sh
+                                              conda activate krc
                                               #source activate krc
-                                              module load mpi/openmpi-x86_64
+                                              #module load mpi/openmpi-x86_64
                                               module load davinci
+                                              export ISISROOT="/usgs/cpkgs/anaconda3_linux/envs/isis3.9.1"
+                                              export ISIS3DATA="/usgs/cpkgs/isis3/data"
                                               {}"""),
                       'pbs':textwrap.dedent("""\
                                             #!/bin/bash
@@ -41,7 +44,7 @@ def parsearguments():
     """
     Render help and parse the command line arguments
 
-    Parameterss.path.dirname(__file__))
+    Parameters.path.dirname(__file__))
     ----------
     None
 
@@ -100,7 +103,6 @@ def submitjobs(inputfile, walltime, nnodes, ncores, manager, subcmd='qsub'):
     command = 'mpirun -n {} /home/jlaura/anaconda3/envs/krc/bin/python {} {}'.format(ncores, interpscript, inputfile)
 
     # Set up the PBS script that manages the cluster
-    print(inputfile)
     logname = os.path.splitext(os.path.basename(inputfile))[0]
     logname = '{}_{}'.format(logname, nnodes * ncores)
 
@@ -138,7 +140,6 @@ def main():
                     continue
                 if len(i.rstrip()) > 0:
                     files.append(i.rstrip())
-        print(files) 
         for f in files:
             with open(parser.inputfile, 'r') as js:
                 inpf = json.load(js)
